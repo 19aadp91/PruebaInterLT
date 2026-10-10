@@ -1,12 +1,12 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Ports;
+using Domain.Common;
 using Domain.Entities;
-using Domain.Exceptions;
 
 namespace Application.Features.Auth.Commands;
 
-public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, AuthResponse>
+public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, Result<AuthResponse>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IStudentRepository _studentRepository;
@@ -28,25 +28,25 @@ public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentComm
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<AuthResponse> HandleAsync(RegisterStudentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResponse>> HandleAsync(RegisterStudentCommand request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.FullName))
-            throw new DomainValidationException("El nombre completo es obligatorio.");
+            return Result<AuthResponse>.Failure("El nombre completo es obligatorio.", ErrorType.Validation);
 
         if (string.IsNullOrWhiteSpace(request.IdentificationNumber))
-            throw new DomainValidationException("El documento de identificación es obligatorio.");
+            return Result<AuthResponse>.Failure("El documento de identificación es obligatorio.", ErrorType.Validation);
 
         if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains('@'))
-            throw new DomainValidationException("El correo electrónico es inválido.");
+            return Result<AuthResponse>.Failure("El correo electrónico es inválido.", ErrorType.Validation);
 
         if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
-            throw new DomainValidationException("La contraseña debe tener al menos 6 caracteres.");
+            return Result<AuthResponse>.Failure("La contraseña debe tener al menos 6 caracteres.", ErrorType.Validation);
 
         if (await _userRepository.ExistsByEmailAsync(request.Email.Trim().ToLowerInvariant(), cancellationToken))
-            throw new ConflictException("Ya existe un usuario registrado con el correo electrónico proporcionado.");
+            return Result<AuthResponse>.Failure("Ya existe un usuario registrado con el correo electrónico proporcionado.", ErrorType.Conflict);
 
         if (await _studentRepository.ExistsByIdentificationNumberAsync(request.IdentificationNumber.Trim(), cancellationToken))
-            throw new ConflictException("Ya existe un estudiante registrado con el documento de identificación proporcionado.");
+            return Result<AuthResponse>.Failure("Ya existe un estudiante registrado con el documento de identificación proporcionado.", ErrorType.Conflict);
 
         var user = new User
         {
@@ -70,6 +70,6 @@ public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentComm
         var token = _tokenService.GenerateToken(user);
         var userDto = new UserProfileDto(user.Id, user.FullName, user.Email, user.Role);
 
-        return new AuthResponse(token, 86400, userDto);
+        return Result<AuthResponse>.Success(new AuthResponse(token, 86400, userDto), "Estudiante registrado exitosamente.");
     }
 }

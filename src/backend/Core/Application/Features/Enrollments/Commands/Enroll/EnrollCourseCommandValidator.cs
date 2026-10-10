@@ -1,21 +1,26 @@
 using Application.Common.Validation;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Enrollments.Commands;
 
 public class EnrollCourseCommandValidator : IValidator<EnrollCourseCommand>
 {
-    public Task ValidateAsync(EnrollCourseCommand request, CancellationToken cancellationToken = default)
+    public Task<Result> ValidateAsync(EnrollCourseCommand request, CancellationToken cancellationToken = default)
     {
         if (request == null)
-            throw new DomainValidationException("La solicitud de inscripción no puede ser nula.");
+            return Task.FromResult(Result.Failure("La solicitud de inscripción no puede ser nula.", ErrorType.Validation));
+
+        var errors = new List<string>();
 
         if (request.StudentId == Guid.Empty)
-            throw new DomainValidationException("El identificador del estudiante es inválido.");
+            errors.Add("El identificador del estudiante es inválido.");
 
         if (request.CourseId == Guid.Empty)
-            throw new DomainValidationException("El identificador de la materia es inválido.");
+            errors.Add("El identificador de la materia es inválido.");
 
-        return Task.CompletedTask;
+        if (errors.Count > 0)
+            return Task.FromResult(Result.Failure("Errores de validación en la solicitud de inscripción.", ErrorType.Validation, errors));
+
+        return Task.FromResult(Result.Success());
     }
 }

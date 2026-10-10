@@ -1,11 +1,11 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Ports;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Catalog.Queries;
 
-public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQuery, StudentProfileDto>
+public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQuery, Result<StudentProfileDto>>
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IEnrollmentRepository _enrollmentRepository;
@@ -16,16 +16,16 @@ public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQu
         _enrollmentRepository = enrollmentRepository;
     }
 
-    public async Task<StudentProfileDto> HandleAsync(GetStudentProfileQuery request, CancellationToken cancellationToken)
+    public async Task<Result<StudentProfileDto>> HandleAsync(GetStudentProfileQuery request, CancellationToken cancellationToken)
     {
         var student = await _studentRepository.GetByIdWithUserAsync(request.StudentId, cancellationToken);
         if (student == null)
-            throw new NotFoundException("Estudiante no encontrado.");
+            return Result<StudentProfileDto>.Failure("Estudiante no encontrado.", ErrorType.NotFound);
 
         var enrollments = await _enrollmentRepository.GetActiveByStudentIdAsync(request.StudentId, cancellationToken);
         var count = enrollments.Count;
 
-        return new StudentProfileDto(
+        var dto = new StudentProfileDto(
             student.Id,
             student.User?.FullName ?? string.Empty,
             student.IdentificationNumber,
@@ -33,5 +33,7 @@ public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQu
             count * 3,
             count
         );
+
+        return Result<StudentProfileDto>.Success(dto);
     }
 }

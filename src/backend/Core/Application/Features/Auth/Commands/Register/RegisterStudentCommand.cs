@@ -1,5 +1,6 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
+using Domain.Common;
 
 namespace Application.Features.Auth.Commands;
 
@@ -8,4 +9,4 @@ public record RegisterStudentCommand(
     string IdentificationNumber,
     string Email,
     string Password
-) : IRequest<AuthResponse>;
+) : IRequest<Result<AuthResponse>>;

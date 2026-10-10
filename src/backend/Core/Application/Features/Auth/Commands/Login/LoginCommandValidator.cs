@@ -1,21 +1,21 @@
 using Application.Common.Validation;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Auth.Commands;
 
 public class LoginCommandValidator : IValidator<LoginCommand>
 {
-    public Task ValidateAsync(LoginCommand request, CancellationToken cancellationToken = default)
+    public Task<Result> ValidateAsync(LoginCommand request, CancellationToken cancellationToken = default)
     {
         if (request == null)
-            throw new UnauthorizedException("Credenciales de acceso inválidas.");
+            return Task.FromResult(Result.Failure("Credenciales de acceso inválidas.", ErrorType.Unauthorized));
 
         if (string.IsNullOrWhiteSpace(request.Email))
-            throw new UnauthorizedException("El correo electrónico es requerido.");
+            return Task.FromResult(Result.Failure("El correo electrónico es requerido.", ErrorType.Validation));
 
         if (string.IsNullOrWhiteSpace(request.Password))
-            throw new UnauthorizedException("La contraseña es requerida.");
+            return Task.FromResult(Result.Failure("La contraseña es requerida.", ErrorType.Validation));
 
-        return Task.CompletedTask;
+        return Task.FromResult(Result.Success());
     }
 }

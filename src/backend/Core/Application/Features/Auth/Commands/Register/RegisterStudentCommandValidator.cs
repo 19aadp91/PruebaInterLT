@@ -1,27 +1,32 @@
 using Application.Common.Validation;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Auth.Commands;
 
 public class RegisterStudentCommandValidator : IValidator<RegisterStudentCommand>
 {
-    public Task ValidateAsync(RegisterStudentCommand request, CancellationToken cancellationToken = default)
+    public Task<Result> ValidateAsync(RegisterStudentCommand request, CancellationToken cancellationToken = default)
     {
         if (request == null)
-            throw new DomainValidationException("La solicitud de registro no puede ser nula.");
+            return Task.FromResult(Result.Failure("La solicitud de registro no puede ser nula.", ErrorType.Validation));
+
+        var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(request.FullName))
-            throw new DomainValidationException("El nombre completo es obligatorio.");
+            errors.Add("El nombre completo es obligatorio.");
 
         if (string.IsNullOrWhiteSpace(request.IdentificationNumber))
-            throw new DomainValidationException("El documento de identificación es obligatorio.");
+            errors.Add("El documento de identificación es obligatorio.");
 
         if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains('@'))
-            throw new DomainValidationException("El correo electrónico es inválido.");
+            errors.Add("El correo electrónico es inválido.");
 
         if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
-            throw new DomainValidationException("La contraseña debe tener al menos 6 caracteres.");
+            errors.Add("La contraseña debe tener al menos 6 caracteres.");
 
-        return Task.CompletedTask;
+        if (errors.Count > 0)
+            return Task.FromResult(Result.Failure("Errores de validación en los datos de registro.", ErrorType.Validation, errors));
+
+        return Task.FromResult(Result.Success());
     }
 }

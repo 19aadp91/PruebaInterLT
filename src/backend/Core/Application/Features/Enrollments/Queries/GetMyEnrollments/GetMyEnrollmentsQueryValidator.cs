@@ -1,18 +1,18 @@
 using Application.Common.Validation;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Enrollments.Queries;
 
 public class GetMyEnrollmentsQueryValidator : IValidator<GetMyEnrollmentsQuery>
 {
-    public Task ValidateAsync(GetMyEnrollmentsQuery request, CancellationToken cancellationToken = default)
+    public Task<Result> ValidateAsync(GetMyEnrollmentsQuery request, CancellationToken cancellationToken = default)
     {
         if (request == null)
-            throw new DomainValidationException("La consulta no puede ser nula.");
+            return Task.FromResult(Result.Failure("La consulta no puede ser nula.", ErrorType.Validation));
 
         if (request.StudentId == Guid.Empty)
-            throw new DomainValidationException("El identificador del estudiante es inválido.");
+            return Task.FromResult(Result.Failure("El identificador del estudiante es inválido.", ErrorType.Validation));
 
-        return Task.CompletedTask;
+        return Task.FromResult(Result.Success());
     }
 }

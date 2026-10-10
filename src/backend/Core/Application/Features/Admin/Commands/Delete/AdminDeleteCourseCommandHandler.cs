@@ -1,10 +1,10 @@
 using Application.Common.Dispatcher;
 using Application.Ports;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Admin.Commands;
 
-public class AdminDeleteCourseCommandHandler : IRequestHandler<AdminDeleteCourseCommand, bool>
+public class AdminDeleteCourseCommandHandler : IRequestHandler<AdminDeleteCourseCommand, Result>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IEnrollmentRepository _enrollmentRepository;
@@ -20,19 +20,19 @@ public class AdminDeleteCourseCommandHandler : IRequestHandler<AdminDeleteCourse
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> HandleAsync(AdminDeleteCourseCommand request, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(AdminDeleteCourseCommand request, CancellationToken cancellationToken)
     {
         var course = await _courseRepository.GetByIdAsync(request.CourseId, cancellationToken);
         if (course == null)
-            throw new NotFoundException("Materia no encontrada.");
+            return Result.Failure("Materia no encontrada.", ErrorType.NotFound);
 
         if (await _enrollmentRepository.HasActiveEnrollmentsByCourseIdAsync(request.CourseId, cancellationToken))
-            throw new ConflictException("No es posible desactivar la materia porque tiene estudiantes inscritos activos.");
+            return Result.Failure("No es posible desactivar la materia porque tiene estudiantes inscritos activos.", ErrorType.Conflict);
 
         course.IsDeleted = true;
         await _courseRepository.UpdateAsync(course, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
-        return true;
+        return Result.Success("Materia eliminada exitosamente.");
     }
 }

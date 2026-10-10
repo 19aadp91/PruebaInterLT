@@ -1,10 +1,11 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Ports;
+using Domain.Common;
 
 namespace Application.Features.Enrollments.Queries;
 
-public class GetMyEnrollmentsQueryHandler : IRequestHandler<GetMyEnrollmentsQuery, StudentEnrollmentSummaryDto>
+public class GetMyEnrollmentsQueryHandler : IRequestHandler<GetMyEnrollmentsQuery, Result<StudentEnrollmentSummaryDto>>
 {
     private readonly IEnrollmentRepository _enrollmentRepository;
 
@@ -13,7 +14,7 @@ public class GetMyEnrollmentsQueryHandler : IRequestHandler<GetMyEnrollmentsQuer
         _enrollmentRepository = enrollmentRepository;
     }
 
-    public async Task<StudentEnrollmentSummaryDto> HandleAsync(GetMyEnrollmentsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<StudentEnrollmentSummaryDto>> HandleAsync(GetMyEnrollmentsQuery request, CancellationToken cancellationToken)
     {
         var enrollments = await _enrollmentRepository.GetActiveByStudentIdAsync(request.StudentId, cancellationToken);
         var items = enrollments.Select(e => new EnrolledCourseItemDto(
@@ -27,6 +28,7 @@ public class GetMyEnrollmentsQueryHandler : IRequestHandler<GetMyEnrollmentsQuer
             e.EnrolledAtUtc
         )).ToList();
 
-        return new StudentEnrollmentSummaryDto(items.Count * 3, 9, items.Count, 3, items);
+        var summary = new StudentEnrollmentSummaryDto(items.Count * 3, 9, items.Count, 3, items);
+        return Result<StudentEnrollmentSummaryDto>.Success(summary);
     }
 }

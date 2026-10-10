@@ -1,6 +1,5 @@
-using Domain.Exceptions;
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
+using Api.Common;
+using Domain.Common;
 using System.Text.Json;
 
 namespace Api.Middleware;
@@ -34,61 +33,26 @@ public class ProblemDetailsExceptionMiddleware
                 actualException = agg.InnerExceptions[0];
             }
 
-            _logger.LogError(actualException, "Excepción interceptada en middleware: {Message}", actualException.Message);
+            _logger.LogError(actualException, "Excepción inesperada interceptada en middleware: {Message}", actualException.Message);
             await HandleExceptionAsync(context, actualException);
         }
     }
 
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        context.Response.ContentType = "application/problem+json";
+        context.Response.ContentType = "application/json";
 
-        var problemDetails = new ProblemDetails
+        var (errorType, message) = exception switch
         {
-            Instance = context.Request.Path
+            UnauthorizedAccessException unauthorizedEx => (ErrorType.Unauthorized, unauthorizedEx.Message),
+            _ => (ErrorType.InternalServerError, "Ocurrió un error inesperado al procesar la solicitud.")
         };
 
-        switch (exception)
-        {
-            case DomainValidationException domainEx:
-                problemDetails.Title = "Violación de Regla de Negocio";
-                problemDetails.Status = (int)HttpStatusCode.BadRequest;
-                problemDetails.Detail = domainEx.Message;
-                problemDetails.Type = "https://tools.ietf.org/html/rfc7807#section-3.1";
-                break;
+        var result = Result<object?>.Failure(message, errorType);
+        context.Response.StatusCode = errorType.ToHttpStatusCode();
 
-            case ConflictException conflictEx:
-                problemDetails.Title = "Conflicto de Estado";
-                problemDetails.Status = (int)HttpStatusCode.Conflict;
-                problemDetails.Detail = conflictEx.Message;
-                problemDetails.Type = "https://tools.ietf.org/html/rfc7807#section-3.1";
-                break;
-
-            case NotFoundException notFoundEx:
-                problemDetails.Title = "Recurso No Encontrado";
-                problemDetails.Status = (int)HttpStatusCode.NotFound;
-                problemDetails.Detail = notFoundEx.Message;
-                problemDetails.Type = "https://tools.ietf.org/html/rfc7807#section-3.1";
-                break;
-
-            case UnauthorizedException unauthorizedEx:
-                problemDetails.Title = "Acceso No Autorizado";
-                problemDetails.Status = (int)HttpStatusCode.Unauthorized;
-                problemDetails.Detail = unauthorizedEx.Message;
-                problemDetails.Type = "https://tools.ietf.org/html/rfc7807#section-3.1";
-                break;
-
-            default:
-                problemDetails.Title = "Error Interno del Servidor";
-                problemDetails.Status = (int)HttpStatusCode.InternalServerError;
-                problemDetails.Detail = "Ocurrió un error inesperado al procesar la solicitud.";
-                problemDetails.Type = "https://tools.ietf.org/html/rfc7807#section-3.1";
-                break;
-        }
-
-        context.Response.StatusCode = problemDetails.Status.Value;
         var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(problemDetails, jsonOptions);
+        var json = JsonSerializer.Serialize(result, jsonOptions);
 
         return context.Response.WriteAsync(json);
     }

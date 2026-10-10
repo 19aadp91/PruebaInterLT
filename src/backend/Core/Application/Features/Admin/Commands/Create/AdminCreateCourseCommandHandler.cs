@@ -1,12 +1,12 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Ports;
+using Domain.Common;
 using Domain.Entities;
-using Domain.Exceptions;
 
 namespace Application.Features.Admin.Commands;
 
-public class AdminCreateCourseCommandHandler : IRequestHandler<AdminCreateCourseCommand, CourseDto>
+public class AdminCreateCourseCommandHandler : IRequestHandler<AdminCreateCourseCommand, Result<CourseDto>>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IProfessorRepository _professorRepository;
@@ -22,20 +22,20 @@ public class AdminCreateCourseCommandHandler : IRequestHandler<AdminCreateCourse
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<CourseDto> HandleAsync(AdminCreateCourseCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CourseDto>> HandleAsync(AdminCreateCourseCommand request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Code))
-            throw new DomainValidationException("El código de la materia es obligatorio.");
+            return Result<CourseDto>.Failure("El código de la materia es obligatorio.", ErrorType.Validation);
 
         if (string.IsNullOrWhiteSpace(request.Name))
-            throw new DomainValidationException("El nombre de la materia es obligatorio.");
+            return Result<CourseDto>.Failure("El nombre de la materia es obligatorio.", ErrorType.Validation);
 
         var professor = await _professorRepository.GetByIdAsync(request.ProfessorId, cancellationToken);
         if (professor == null)
-            throw new NotFoundException("El profesor asignado no existe.");
+            return Result<CourseDto>.Failure("El profesor asignado no existe.", ErrorType.NotFound);
 
         if (await _courseRepository.ExistsByCodeAsync(request.Code.Trim().ToUpperInvariant(), cancellationToken))
-            throw new ConflictException("Ya existe una materia con ese código.");
+            return Result<CourseDto>.Failure("Ya existe una materia con ese código.", ErrorType.Conflict);
 
         var course = new Course
         {
@@ -50,12 +50,14 @@ public class AdminCreateCourseCommandHandler : IRequestHandler<AdminCreateCourse
         await _courseRepository.AddAsync(course, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
-        return new CourseDto(
+        var dto = new CourseDto(
             course.Id,
             course.Code,
             course.Name,
             course.Credits,
             new ProfessorDto(professor.Id, professor.FullName, professor.Email, professor.IsAvailable)
         );
+
+        return Result<CourseDto>.Success(dto, "Materia creada exitosamente.");
     }
 }

@@ -1,13 +1,13 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Features.Auth.Commands;
+using Domain.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
-[ApiController]
 [Route("api/v1/auth")]
-public class AuthController : ControllerBase
+public class AuthController : BaseApiController
 {
     private readonly IDispatcher _dispatcher;
 
@@ -17,21 +17,21 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(Result<AuthResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Result<AuthResponse>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result<AuthResponse>), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] RegisterStudentCommand command, CancellationToken ct)
     {
         var response = await _dispatcher.SendAsync(command, ct);
-        return StatusCode(StatusCodes.Status201Created, response);
+        return ToActionResult(response, StatusCodes.Status201Created);
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(Result<AuthResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<AuthResponse>), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
     {
         var response = await _dispatcher.SendAsync(command, ct);
-        return Ok(response);
+        return ToActionResult(response, StatusCodes.Status200OK);
     }
 }

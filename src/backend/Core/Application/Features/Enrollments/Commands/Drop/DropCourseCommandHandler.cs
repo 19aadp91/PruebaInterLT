@@ -1,12 +1,12 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Ports;
+using Domain.Common;
 using Domain.Entities;
-using Domain.Exceptions;
 
 namespace Application.Features.Enrollments.Commands;
 
-public class DropCourseCommandHandler : IRequestHandler<DropCourseCommand, StudentEnrollmentSummaryDto>
+public class DropCourseCommandHandler : IRequestHandler<DropCourseCommand, Result<StudentEnrollmentSummaryDto>>
 {
     private readonly IEnrollmentRepository _enrollmentRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -17,17 +17,17 @@ public class DropCourseCommandHandler : IRequestHandler<DropCourseCommand, Stude
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<StudentEnrollmentSummaryDto> HandleAsync(DropCourseCommand request, CancellationToken cancellationToken)
+    public async Task<Result<StudentEnrollmentSummaryDto>> HandleAsync(DropCourseCommand request, CancellationToken cancellationToken)
     {
         var enrollment = await _enrollmentRepository.GetActiveByStudentAndCourseAsync(request.StudentId, request.CourseId, cancellationToken);
         if (enrollment == null)
-            throw new NotFoundException("La materia no se encuentra registrada en la carga académica actual.");
+            return Result<StudentEnrollmentSummaryDto>.Failure("La materia no se encuentra registrada en la carga académica actual.", ErrorType.NotFound);
 
         await _enrollmentRepository.RemoveAsync(enrollment, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
         var updatedEnrollments = await _enrollmentRepository.GetActiveByStudentIdAsync(request.StudentId, cancellationToken);
-        return MapToSummary(updatedEnrollments);
+        return Result<StudentEnrollmentSummaryDto>.Success(MapToSummary(updatedEnrollments), "Materia cancelada exitosamente.");
     }
 
     private static StudentEnrollmentSummaryDto MapToSummary(IReadOnlyList<Enrollment> enrollments)

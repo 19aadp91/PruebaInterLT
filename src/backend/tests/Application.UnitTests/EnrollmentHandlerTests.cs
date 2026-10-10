@@ -3,8 +3,8 @@ using Application.Features.Catalog.Queries;
 using Application.Features.Enrollments.Commands;
 using Application.Features.Enrollments.Queries;
 using Application.Ports;
+using Domain.Common;
 using Domain.Entities;
-using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -76,8 +76,10 @@ public class EnrollmentHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result.EnrolledCoursesCount.Should().Be(1);
-        result.TotalCredits.Should().Be(3);
+        result.IsSuccess.Should().BeTrue();
+        result.Data.Should().NotBeNull();
+        result.Data!.EnrolledCoursesCount.Should().Be(1);
+        result.Data.TotalCredits.Should().Be(3);
         _enrollmentRepo.Verify(r => r.AddAsync(It.IsAny<Enrollment>(), It.IsAny<CancellationToken>()), Times.Once);
         _uow.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -97,8 +99,10 @@ public class EnrollmentHandlerTests
         var result = await _dropHandler.HandleAsync(new DropCourseCommand(studentId, courseId), CancellationToken.None);
 
         // Assert
-        result.EnrolledCoursesCount.Should().Be(0);
-        result.TotalCredits.Should().Be(0);
+        result.IsSuccess.Should().BeTrue();
+        result.Data.Should().NotBeNull();
+        result.Data!.EnrolledCoursesCount.Should().Be(0);
+        result.Data.TotalCredits.Should().Be(0);
         _enrollmentRepo.Verify(r => r.RemoveAsync(enrollment, It.IsAny<CancellationToken>()), Times.Once);
         _uow.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -120,8 +124,9 @@ public class EnrollmentHandlerTests
         var result = await _classmatesHandler.HandleAsync(new GetCourseClassmatesQuery(courseId), CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(1);
-        result[0].FullName.Should().Be("María Fernanda Ruiz");
+        result.IsSuccess.Should().BeTrue();
+        result.Data.Should().HaveCount(1);
+        result.Data![0].FullName.Should().Be("María Fernanda Ruiz");
     }
 
     [Fact]
@@ -137,7 +142,8 @@ public class EnrollmentHandlerTests
         var result = await _publicStudentsHandler.HandleAsync(new GetPublicStudentsQuery(), CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(1);
-        result[0].FullName.Should().Be("Carlos Gómez");
+        result.IsSuccess.Should().BeTrue();
+        result.Data.Should().HaveCount(1);
+        result.Data![0].FullName.Should().Be("Carlos Gómez");
     }
 }

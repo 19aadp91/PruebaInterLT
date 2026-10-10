@@ -1,11 +1,11 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Ports;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Auth.Commands;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<AuthResponse>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -21,22 +21,22 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         _tokenService = tokenService;
     }
 
-    public async Task<AuthResponse> HandleAsync(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResponse>> HandleAsync(LoginCommand request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            throw new UnauthorizedException("Credenciales de acceso inválidas.");
+            return Result<AuthResponse>.Failure("Credenciales de acceso inválidas.", ErrorType.Unauthorized);
 
         var user = await _userRepository.GetByEmailAsync(request.Email.Trim().ToLowerInvariant(), cancellationToken);
         if (user == null)
-            throw new UnauthorizedException("Credenciales de acceso inválidas.");
+            return Result<AuthResponse>.Failure("Credenciales de acceso inválidas.", ErrorType.Unauthorized);
 
         var isPasswordValid = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
         if (!isPasswordValid)
-            throw new UnauthorizedException("Credenciales de acceso inválidas.");
+            return Result<AuthResponse>.Failure("Credenciales de acceso inválidas.", ErrorType.Unauthorized);
 
         var token = _tokenService.GenerateToken(user);
         var userDto = new UserProfileDto(user.Id, user.FullName, user.Email, user.Role);
 
-        return new AuthResponse(token, 86400, userDto);
+        return Result<AuthResponse>.Success(new AuthResponse(token, 86400, userDto), "Inicio de sesión exitoso.");
     }
 }

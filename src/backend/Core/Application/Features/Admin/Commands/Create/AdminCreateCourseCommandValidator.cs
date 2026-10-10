@@ -1,24 +1,29 @@
 using Application.Common.Validation;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Admin.Commands;
 
 public class AdminCreateCourseCommandValidator : IValidator<AdminCreateCourseCommand>
 {
-    public Task ValidateAsync(AdminCreateCourseCommand request, CancellationToken cancellationToken = default)
+    public Task<Result> ValidateAsync(AdminCreateCourseCommand request, CancellationToken cancellationToken = default)
     {
         if (request == null)
-            throw new DomainValidationException("La solicitud no puede ser nula.");
+            return Task.FromResult(Result.Failure("La solicitud no puede ser nula.", ErrorType.Validation));
+
+        var errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(request.Code))
-            throw new DomainValidationException("El código de la materia es obligatorio.");
+            errors.Add("El código de la materia es obligatorio.");
 
         if (string.IsNullOrWhiteSpace(request.Name))
-            throw new DomainValidationException("El nombre de la materia es obligatorio.");
+            errors.Add("El nombre de la materia es obligatorio.");
 
         if (request.ProfessorId == Guid.Empty)
-            throw new DomainValidationException("El identificador del profesor asignado es inválido.");
+            errors.Add("El identificador del profesor asignado es inválido.");
 
-        return Task.CompletedTask;
+        if (errors.Count > 0)
+            return Task.FromResult(Result.Failure("Errores de validación al crear la materia.", ErrorType.Validation, errors));
+
+        return Task.FromResult(Result.Success());
     }
 }

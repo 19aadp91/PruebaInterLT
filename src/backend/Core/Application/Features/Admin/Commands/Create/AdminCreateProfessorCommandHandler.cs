@@ -1,12 +1,12 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
 using Application.Ports;
+using Domain.Common;
 using Domain.Entities;
-using Domain.Exceptions;
 
 namespace Application.Features.Admin.Commands;
 
-public class AdminCreateProfessorCommandHandler : IRequestHandler<AdminCreateProfessorCommand, ProfessorDto>
+public class AdminCreateProfessorCommandHandler : IRequestHandler<AdminCreateProfessorCommand, Result<ProfessorDto>>
 {
     private readonly IProfessorRepository _professorRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -17,16 +17,16 @@ public class AdminCreateProfessorCommandHandler : IRequestHandler<AdminCreatePro
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ProfessorDto> HandleAsync(AdminCreateProfessorCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ProfessorDto>> HandleAsync(AdminCreateProfessorCommand request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.FullName))
-            throw new DomainValidationException("El nombre del profesor es obligatorio.");
+            return Result<ProfessorDto>.Failure("El nombre del profesor es obligatorio.", ErrorType.Validation);
 
         if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains('@'))
-            throw new DomainValidationException("El correo del profesor es inválido.");
+            return Result<ProfessorDto>.Failure("El correo del profesor es inválido.", ErrorType.Validation);
 
         if (await _professorRepository.ExistsByEmailAsync(request.Email.Trim().ToLowerInvariant(), cancellationToken))
-            throw new ConflictException("Ya existe un docente registrado con ese correo.");
+            return Result<ProfessorDto>.Failure("Ya existe un docente registrado con ese correo.", ErrorType.Conflict);
 
         var professor = new Professor
         {
@@ -39,6 +39,7 @@ public class AdminCreateProfessorCommandHandler : IRequestHandler<AdminCreatePro
         await _professorRepository.AddAsync(professor, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
-        return new ProfessorDto(professor.Id, professor.FullName, professor.Email, professor.IsAvailable);
+        var dto = new ProfessorDto(professor.Id, professor.FullName, professor.Email, professor.IsAvailable);
+        return Result<ProfessorDto>.Success(dto, "Docente creado exitosamente.");
     }
 }

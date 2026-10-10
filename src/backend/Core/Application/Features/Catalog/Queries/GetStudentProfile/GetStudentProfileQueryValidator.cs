@@ -1,18 +1,18 @@
 using Application.Common.Validation;
-using Domain.Exceptions;
+using Domain.Common;
 
 namespace Application.Features.Catalog.Queries;
 
 public class GetStudentProfileQueryValidator : IValidator<GetStudentProfileQuery>
 {
-    public Task ValidateAsync(GetStudentProfileQuery request, CancellationToken cancellationToken = default)
+    public Task<Result> ValidateAsync(GetStudentProfileQuery request, CancellationToken cancellationToken = default)
     {
         if (request == null)
-            throw new DomainValidationException("La consulta de perfil no puede ser nula.");
+            return Task.FromResult(Result.Failure("La consulta de perfil no puede ser nula.", ErrorType.Validation));
 
         if (request.StudentId == Guid.Empty)
-            throw new DomainValidationException("El identificador del estudiante es inválido.");
+            return Task.FromResult(Result.Failure("El identificador del estudiante es inválido.", ErrorType.Validation));
 
-        return Task.CompletedTask;
+        return Task.FromResult(Result.Success());
     }
 }

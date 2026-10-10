@@ -1,4 +1,5 @@
 using Application.Common.Validation;
+using Domain.Common;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
@@ -31,14 +32,21 @@ public class NativeDispatcher : IDispatcher
                 var validateMethod = validatorType.GetMethod(nameof(IValidator<object>.ValidateAsync));
                 if (validateMethod != null)
                 {
+                    Task<Result> validationTask;
                     try
                     {
-                        var validationTask = (Task)validateMethod.Invoke(validator, new object[] { request, cancellationToken })!;
-                        await validationTask;
+                        validationTask = (Task<Result>)validateMethod.Invoke(validator, new object[] { request, cancellationToken })!;
                     }
                     catch (TargetInvocationException ex) when (ex.InnerException != null)
                     {
                         ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                        throw;
+                    }
+
+                    var validationResult = await validationTask;
+                    if (!validationResult.IsSuccess)
+                    {
+                        return CreateFailureResponse<TResponse>(validationResult);
                     }
                 }
             }
@@ -64,5 +72,24 @@ public class NativeDispatcher : IDispatcher
             ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
             throw;
         }
+    }
+
+    private static TResponse CreateFailureResponse<TResponse>(Result validationResult)
+    {
+        if (typeof(TResponse) == typeof(Result))
+        {
+            return (TResponse)(object)validationResult;
+        }
+
+        if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(Result<>))
+        {
+            var failureMethod = typeof(TResponse).GetMethod("Failure", new[] { typeof(string), typeof(ErrorType), typeof(List<string>) });
+            if (failureMethod != null)
+            {
+                return (TResponse)failureMethod.Invoke(null, new object[] { validationResult.Message!, validationResult.ErrorType, validationResult.Errors })!;
+            }
+        }
+
+        throw new InvalidOperationException($"La solicitud no superó la validación: {validationResult.Message}");
     }
 }
