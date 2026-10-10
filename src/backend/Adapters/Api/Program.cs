@@ -1,6 +1,7 @@
 using Api.Middleware;
 using Application.Common.Dispatcher;
-using Infrastructure;
+using Application.Extension;
+using Infrastructure.Extension;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
