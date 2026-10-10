@@ -1,4 +1,4 @@
-﻿.catalog-container {
+.catalog-container {
   max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -78,25 +78,7 @@
   gap: 0.5rem;
 }
 
-.alert-success {
-  background: #dcfce7;
-  border-left: 4px solid #22c55e;
-  color: #15803d;
-  padding: 0.85rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1.5rem;
-  font-weight: 500;
-}
 
-.alert-error {
-  background: #fee2e2;
-  border-left: 4px solid #ef4444;
-  color: #b91c1c;
-  padding: 0.85rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1.5rem;
-  font-weight: 500;
-}
 
 .course-grid {
   display: grid;

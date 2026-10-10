@@ -1,4 +1,4 @@
-﻿.login-card {
+.login-card {
   max-width: 420px;
   margin: 3rem auto;
   padding: 2rem;
@@ -21,72 +21,6 @@ h2 {
   font-size: 0.9rem;
   text-align: center;
   margin-bottom: 1.5rem;
-}
-
-.alert-error {
-  background: #fee2e2;
-  border-left: 4px solid #ef4444;
-  color: #b91c1c;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 0.25rem;
-}
-
-.form-group input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.95rem;
-}
-
-.btn-submit {
-  width: 100%;
-  padding: 0.75rem;
-  background: #ea580c;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.btn-submit:hover:not(:disabled) {
-  background: #c2410c;
-}
-
-.footer-links {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-.footer-links a {
-  color: #ea580c;
-  font-weight: 600;
-  text-decoration: none;
 }
 
 .demo-credentials {

@@ -1,1 +1,149 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   Global & Common Component Styles
+   Sistema de Registro Académico · Inter Rapidísimo S.A.
+   ========================================================================== */
+
+/* --- Reset & Base Typography --- */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+  background-color: #f8fafc;
+}
+
+/* --- Títulos y Encabezados Comunes --- */
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+}
+
+.page-subtitle {
+  color: #64748b;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* --- Alertas y Notificaciones --- */
+.alert-success {
+  background: #dcfce7;
+  border-left: 4px solid #22c55e;
+  color: #15803d;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.alert-error {
+  background: #fee2e2;
+  border-left: 4px solid #ef4444;
+  color: #b91c1c;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.privacy-alert {
+  background: #f8fafc;
+  border-left: 4px solid #0284c7;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #0369a1;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Formularios Comunes --- */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.25rem;
+}
+
+.form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #ea580c;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+}
+
+/* --- Botones Comunes --- */
+.btn-submit {
+  width: 100%;
+  padding: 0.75rem;
+  background: #ea580c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #c2410c;
+}
+
+.btn-deactivate,
+.btn-drop {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.btn-deactivate:hover,
+.btn-drop:hover {
+  background: #fecaca;
+}
+
+/* --- Tablas y Tarjetas Comunes --- */
+.table-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Enlaces de pie de autenticación --- */
+.footer-links {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.footer-links a {
+  color: #ea580c;
+  font-weight: 600;
+  text-decoration: none;
+}

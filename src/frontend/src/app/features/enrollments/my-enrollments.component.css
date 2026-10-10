@@ -1,4 +1,4 @@
-﻿.enrollments-container {
+.enrollments-container {
   max-width: 1000px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -11,19 +11,6 @@
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
-}
-
-.page-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.25rem 0;
-}
-
-.page-subtitle {
-  color: #64748b;
-  margin: 0;
-  font-size: 0.95rem;
 }
 
 .btn-enroll-more {
@@ -39,16 +26,6 @@
 
 .btn-enroll-more:hover {
   background: #c2410c;
-}
-
-.alert-success {
-  background: #dcfce7;
-  border-left: 4px solid #22c55e;
-  color: #15803d;
-  padding: 0.85rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1.5rem;
-  font-weight: 500;
 }
 
 .empty-state {
@@ -86,13 +63,7 @@
   font-weight: 600;
 }
 
-.table-card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+
 
 .table-card-header {
   background: #f8fafc;
@@ -185,16 +156,7 @@
   font-size: 0.85rem;
 }
 
-.btn-drop {
-  background: #fee2e2;
-  color: #b91c1c;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
+
 
 /* Modal styles */
 .modal-backdrop {

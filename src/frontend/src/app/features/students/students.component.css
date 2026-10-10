@@ -1,4 +1,4 @@
-﻿.students-container {
+.students-container {
   max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -8,36 +8,7 @@
   margin-bottom: 1.5rem;
 }
 
-.page-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.25rem 0;
-}
 
-.page-subtitle {
-  color: #64748b;
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.privacy-alert {
-  background: #f8fafc;
-  border-left: 4px solid #0284c7;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: #0369a1;
-  margin-bottom: 1.5rem;
-}
-
-.table-card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
 
 .students-table {
   width: 100%;
