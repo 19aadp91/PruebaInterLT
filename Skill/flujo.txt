@@ -1,0 +1,57 @@
+========================================================================================
+                          PIPELINE MULTI-AGENTE SDD (SPEC-DRIVEN DEVELOPMENT)
+========================================================================================
+
+                                    [Visión del Proyecto]
+                                              │
+                                              ▼
+[Fase 0: Constitution Agent] ────────► docs/constitution.md
+(generador-constitucion)               (Ley técnica innegociable inyectada a todos los agentes)
+                                              │
+                                              ▼
+[Fase 1: Product Spec Agent] ────────► docs/specs/<feature>/spec.md
+(generador-especificaciones)                  │
+                                              ▼
+                                 [Revisor de Especificaciones] ──► (Auditoría previa de QA)
+                                              │
+                                              ▼
+[Fase 2: Architecture Agent] ────────► 1. openapi.yaml (Contrato canónico API REST 3.1)
+(generador-arquitectura)               2. architecture-spec.md (Clean Architecture + Signals)
+                                       3. schema-spec.md (Modelo relacional SQL Server)
+                                       4. cloud-architecture.md (Topología AWS)
+                                              │
+                                              ▼
+[Fase 3: Planners & Tasks] ──────────► 1. docs/specs/<feature>/plan.md
+(planificador-tecnico / generador-tareas) 2. docs/specs/<feature>/tasks.md (Backlog atómico)
+                                              │
+                      ┌───────────────────────┼───────────────────────┐
+                      ▼                       ▼                       ▼
+            [Fase 4A: DB Agent]     [Fase 4B: Backend Agent] [Fase 4C: Frontend Agent]
+             (agente-database)          (agente-backend)         (agente-frontend)
+            • Scripts T-SQL          • ASP.NET Core (.NET 8/9) • Angular Standalone
+            • Auditoría canónica     • Clean Architecture      • Reactive Signals
+            • Migraciones EF Core    • CQRS (MediatR)          • Cero 'any' / Estricto
+            • Índices y FKs          • ProblemDetails (RFC 7807) • Servicios tipados
+                      │                       │                       │
+                      └───────────────────────┼───────────────────────┘
+                                              │
+                                              ▼
+                                 [Fase 5: Constitutional QA]
+                                  (agente-qa / verificador)
+                                 Audita: Contratos OpenAPI + Constitución + Tests (>=85%)
+                                              │
+                             ┌────────────────┴────────────────┐
+                             │                                 │
+                   [STATUS: REJECTED]                  [STATUS: PASSED]
+                             │                                 │
+                             ▼                                 ▼
+                 [Directivas de Remediación]        [Fase 6: AWS DevOps Agent]
+                 (spec-compliance-report.md)              (agente-devops)
+                             │                      • Terraform modular (IaC)
+                             │                      • Subredes aisladas (RDS)
+                             ▼                      • ECS Fargate + ALB
+               [Retorno a Agente Infractor]         • CloudFront + S3 (OAC)
+                  (Backend / Frontend / DB)         • Secrets Manager (Cero plano)
+                             │                      • Pipelines CI/CD
+                             └───────────────────────────────┘
+========================================================================================

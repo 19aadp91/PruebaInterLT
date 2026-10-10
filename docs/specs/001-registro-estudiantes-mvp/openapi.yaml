@@ -1,0 +1,757 @@
+openapi: 3.1.0
+info:
+  title: API de Registro de Estudiantes e Inscripción Académica
+  version: 1.0.0
+  description: Contrato canónico de API REST para el sistema de registro de estudiantes, inscripción con regla de profesor único y administración académica.
+servers:
+  - url: /api/v1
+    description: Servidor de API v1
+
+paths:
+  /auth/register:
+    post:
+      summary: Registro en línea de estudiante
+      description: Registra una nueva cuenta de estudiante adhiriéndose al programa de créditos.
+      operationId: registerStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterStudentRequest'
+      responses:
+        '201':
+          description: Estudiante registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Datos inválidos o contraseña menor a 6 caracteres
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Documento o correo electrónico ya registrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /auth/login:
+    post:
+      summary: Inicio de sesión
+      description: Autentica un usuario y devuelve un token Bearer JWT.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Credenciales incorrectas
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /students:
+    get:
+      summary: Lista pública de estudiantes registrados
+      description: Retorna la lista de todos los estudiantes registrados exponiendo únicamente su nombre completo por privacidad.
+      operationId: getPublicStudents
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Listado obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicStudentDto'
+        '401':
+          description: No autorizado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /students/me:
+    get:
+      summary: Perfil del estudiante autenticado
+      description: Retorna la información del perfil del estudiante en sesión.
+      operationId: getCurrentStudentProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Perfil obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentProfileDto'
+        '401':
+          description: No autorizado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /students/me/enrollments:
+    get:
+      summary: Materias inscritas del estudiante autenticado
+      description: Retorna la lista de asignaturas inscritas por el estudiante y el total de créditos acumulados.
+      operationId: getMyEnrollments
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Inscripciones obtenidas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentEnrollmentSummaryDto'
+        '401':
+          description: No autorizado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+    post:
+      summary: Inscribir una asignatura
+      description: Inscribe una materia validando el límite máximo de 3 materias (9 créditos) y la regla innegociable de no repetir profesor.
+      operationId: enrollCourse
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollCourseRequest'
+      responses:
+        '201':
+          description: Materia inscrita exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentEnrollmentSummaryDto'
+        '400':
+          description: Límite de créditos/materias superado o violación de regla de profesor no repetido
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Materia ya inscrita por el estudiante
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /students/me/enrollments/{courseId}:
+    delete:
+      summary: Retirar una asignatura inscrita
+      description: Cancela la inscripción de una materia liberando créditos.
+      operationId: dropCourse
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Materia retirada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentEnrollmentSummaryDto'
+        '404':
+          description: La materia no se encuentra inscrita
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /courses:
+    get:
+      summary: Catálogo de materias ofertadas
+      description: Retorna la lista de asignaturas ofertadas con su código, créditos (3 c/u) y profesor asignado.
+      operationId: getCourses
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Catálogo obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDto'
+        '401':
+          description: No autorizado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /courses/{courseId}/classmates:
+    get:
+      summary: Compañeros de clase de una asignatura
+      description: Retorna exclusivamente los nombres completos de los estudiantes que comparten una materia.
+      operationId: getCourseClassmates
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de compañeros obtenida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClassmateDto'
+        '404':
+          description: Materia no encontrada
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /admin/professors:
+    get:
+      summary: Listar todos los profesores (Admin)
+      operationId: adminGetProfessors
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Listado de profesores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfessorDto'
+    post:
+      summary: Crear profesor (Admin)
+      operationId: adminCreateProfessor
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProfessorRequest'
+      responses:
+        '201':
+          description: Profesor creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfessorDto'
+
+  /admin/professors/{id}:
+    put:
+      summary: Actualizar profesor (Admin)
+      operationId: adminUpdateProfessor
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfessorRequest'
+      responses:
+        '200':
+          description: Profesor actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfessorDto'
+    delete:
+      summary: Desactivar profesor (Admin)
+      operationId: adminDeleteProfessor
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Profesor desactivado
+        '409':
+          description: El profesor tiene materias con alumnos inscritos activos
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /admin/courses:
+    get:
+      summary: Listar todas las materias (Admin)
+      operationId: adminGetCourses
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Listado de materias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDto'
+    post:
+      summary: Crear materia (Admin)
+      operationId: adminCreateCourse
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseRequest'
+      responses:
+        '201':
+          description: Materia creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDto'
+
+  /admin/courses/{id}:
+    put:
+      summary: Actualizar materia o reasignar profesor (Admin)
+      operationId: adminUpdateCourse
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCourseRequest'
+      responses:
+        '200':
+          description: Materia actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDto'
+    delete:
+      summary: Desactivar materia (Admin)
+      operationId: adminDeleteCourse
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Materia desactivada
+        '409':
+          description: La materia tiene inscripciones activas
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterStudentRequest:
+      type: object
+      required:
+        - fullName
+        - identificationNumber
+        - email
+        - password
+      properties:
+        fullName:
+          type: string
+          example: 'Carlos Alberto Perez'
+        identificationNumber:
+          type: string
+          example: '1020304050'
+        email:
+          type: string
+          format: email
+          example: 'carlos.perez@universidad.edu.co'
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: 'Segura123!'
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: 'carlos.perez@universidad.edu.co'
+        password:
+          type: string
+          format: password
+          example: 'Segura123!'
+
+    AuthResponse:
+      type: object
+      required:
+        - token
+        - expiresInSeconds
+        - user
+      properties:
+        token:
+          type: string
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        expiresInSeconds:
+          type: integer
+          example: 86400
+        user:
+          $ref: '#/components/schemas/UserProfileDto'
+
+    UserProfileDto:
+      type: object
+      required:
+        - id
+        - fullName
+        - email
+        - role
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          example: 'Carlos Alberto Perez'
+        email:
+          type: string
+          format: email
+          example: 'carlos.perez@universidad.edu.co'
+        role:
+          type: string
+          enum: [Estudiante, Administrador]
+          example: 'Estudiante'
+
+    PublicStudentDto:
+      type: object
+      required:
+        - id
+        - fullName
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          example: 'Carlos Alberto Perez'
+
+    StudentProfileDto:
+      type: object
+      required:
+        - id
+        - fullName
+        - identificationNumber
+        - email
+        - totalCredits
+        - enrolledCoursesCount
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          example: 'Carlos Alberto Perez'
+        identificationNumber:
+          type: string
+          example: '1020304050'
+        email:
+          type: string
+          format: email
+          example: 'carlos.perez@universidad.edu.co'
+        totalCredits:
+          type: integer
+          example: 6
+        enrolledCoursesCount:
+          type: integer
+          example: 2
+
+    ProfessorDto:
+      type: object
+      required:
+        - id
+        - fullName
+        - email
+        - isAvailable
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          example: 'Prof. Andrés Gómez'
+        email:
+          type: string
+          format: email
+          example: 'andres.gomez@universidad.edu.co'
+        isAvailable:
+          type: boolean
+          example: true
+
+    CourseDto:
+      type: object
+      required:
+        - id
+        - code
+        - name
+        - credits
+        - professor
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: 'MAT-101'
+        name:
+          type: string
+          example: 'Cálculo Diferencial'
+        credits:
+          type: integer
+          example: 3
+        professor:
+          $ref: '#/components/schemas/ProfessorDto'
+
+    EnrollCourseRequest:
+      type: object
+      required:
+        - courseId
+      properties:
+        courseId:
+          type: string
+          format: uuid
+
+    EnrolledCourseItemDto:
+      type: object
+      required:
+        - enrollmentId
+        - courseId
+        - courseCode
+        - courseName
+        - credits
+        - professorId
+        - professorName
+        - enrolledAtUtc
+      properties:
+        enrollmentId:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+        courseCode:
+          type: string
+          example: 'MAT-101'
+        courseName:
+          type: string
+          example: 'Cálculo Diferencial'
+        credits:
+          type: integer
+          example: 3
+        professorId:
+          type: string
+          format: uuid
+        professorName:
+          type: string
+          example: 'Prof. Andrés Gómez'
+        enrolledAtUtc:
+          type: string
+          format: date-time
+
+    StudentEnrollmentSummaryDto:
+      type: object
+      required:
+        - totalCredits
+        - maxCredits
+        - enrolledCoursesCount
+        - maxCourses
+        - courses
+      properties:
+        totalCredits:
+          type: integer
+          example: 6
+        maxCredits:
+          type: integer
+          example: 9
+        enrolledCoursesCount:
+          type: integer
+          example: 2
+        maxCourses:
+          type: integer
+          example: 3
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrolledCourseItemDto'
+
+    ClassmateDto:
+      type: object
+      required:
+        - id
+        - fullName
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          example: 'María Fernanda Ruiz'
+
+    CreateProfessorRequest:
+      type: object
+      required:
+        - fullName
+        - email
+      properties:
+        fullName:
+          type: string
+          example: 'Prof. Roberto Silva'
+        email:
+          type: string
+          format: email
+          example: 'roberto.silva@universidad.edu.co'
+
+    UpdateProfessorRequest:
+      type: object
+      required:
+        - fullName
+        - email
+        - isAvailable
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        isAvailable:
+          type: boolean
+
+    CreateCourseRequest:
+      type: object
+      required:
+        - code
+        - name
+        - professorId
+      properties:
+        code:
+          type: string
+          example: 'PROG-102'
+        name:
+          type: string
+          example: 'Estructuras de Datos'
+        credits:
+          type: integer
+          default: 3
+        professorId:
+          type: string
+          format: uuid
+
+    UpdateCourseRequest:
+      type: object
+      required:
+        - name
+        - professorId
+      properties:
+        name:
+          type: string
+        professorId:
+          type: string
+          format: uuid
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          example: 'https://tools.ietf.org/html/rfc7807'
+        title:
+          type: string
+          example: 'Violación de Regla de Negocio'
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: 'No es posible inscribir la materia porque el profesor Andrés Gómez ya dicta otra materia actualmente inscrita.'
+        instance:
+          type: string
+          example: '/api/v1/students/me/enrollments'
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

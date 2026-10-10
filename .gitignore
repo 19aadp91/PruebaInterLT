@@ -1,0 +1,50 @@
+# ==========================================
+# .NET / Visual Studio
+# ==========================================
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+.vs/
+TestResults/
+*.trx
+*.DotSettings.user
+*.mdf
+*.ldf
+
+# ==========================================
+# Node / Angular / Frontend
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.angular/
+dist/
+tmp/
+out-tsc/
+bazel-out/
+.sass-cache/
+connect.lock
+coverage/
+*.lcov
+
+# ==========================================
+# Editors & OS
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.bak
+*~
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+.DS_Store
