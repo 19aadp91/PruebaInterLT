@@ -27,7 +27,11 @@ export class LoginComponent {
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/catalog']);
+        if (this.authService.isAdmin()) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/catalog']);
+        }
       },
       error: (err) => {
         this.loading.set(false);

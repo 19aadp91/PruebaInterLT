@@ -1,4 +1,4 @@
-﻿<header class="navbar-header">
+<header class="navbar-header">
   <div class="navbar-container">
     <div class="brand-group">
       <div class="brand-badge">
@@ -9,15 +9,17 @@
 
     @if (authService.isAuthenticated()) {
       <nav class="nav-links">
-        <a routerLink="/catalog" routerLinkActive="active-nav" class="nav-link">Catálogo</a>
-        <a routerLink="/my-enrollments" routerLinkActive="active-nav" class="nav-link">
-          Mis Materias
-          @if (academicService.myEnrollments(); as summary) {
-            <span class="credits-badge">
-              {{ summary.totalCredits }}/9 CR
-            </span>
-          }
-        </a>
+        @if (authService.isStudent()) {
+          <a routerLink="/catalog" routerLinkActive="active-nav" class="nav-link">Catálogo</a>
+          <a routerLink="/my-enrollments" routerLinkActive="active-nav" class="nav-link">
+            Mis Materias
+            @if (academicService.myEnrollments(); as summary) {
+              <span class="credits-badge">
+                {{ summary.totalCredits }}/9 CR
+              </span>
+            }
+          </a>
+        }
         <a routerLink="/students" routerLinkActive="active-nav" class="nav-link">Estudiantes</a>
         
         @if (authService.isAdmin()) {
