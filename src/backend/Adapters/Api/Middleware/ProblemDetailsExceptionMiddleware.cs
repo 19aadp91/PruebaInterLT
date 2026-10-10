@@ -24,8 +24,18 @@ public class ProblemDetailsExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Excepción interceptada en middleware: {Message}", ex.Message);
-            await HandleExceptionAsync(context, ex);
+            var actualException = ex;
+            while (actualException is System.Reflection.TargetInvocationException tie && tie.InnerException != null)
+            {
+                actualException = tie.InnerException;
+            }
+            if (actualException is AggregateException agg && agg.InnerExceptions.Count == 1)
+            {
+                actualException = agg.InnerExceptions[0];
+            }
+
+            _logger.LogError(actualException, "Excepción interceptada en middleware: {Message}", actualException.Message);
+            await HandleExceptionAsync(context, actualException);
         }
     }
 

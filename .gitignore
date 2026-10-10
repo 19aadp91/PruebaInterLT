@@ -16,6 +16,8 @@ TestResults/
 *.DotSettings.user
 *.mdf
 *.ldf
+publish/
+[Pp]ublish/
 
 # ==========================================
 # Node / Angular / Frontend
