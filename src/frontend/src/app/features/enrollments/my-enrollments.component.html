@@ -1,0 +1,114 @@
+﻿<div class="enrollments-container">
+  <div class="header-section">
+    <div>
+      <h1 class="page-title">Mis Materias Inscritas</h1>
+      <p class="page-subtitle">Gestiona tu carga académica y consulta a tus compañeros de clase</p>
+    </div>
+    <a routerLink="/catalog" class="btn-enroll-more">
+      + Inscribir Más Asignaturas
+    </a>
+  </div>
+
+  @if (actionMessage()) {
+    <div class="alert-success">
+      {{ actionMessage() }}
+    </div>
+  }
+
+  @if (academicService.myEnrollments(); as summary) {
+    @if (summary.courses.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <h3 class="empty-title">No tienes asignaturas inscritas</h3>
+        <p class="empty-subtitle">Explora el catálogo de 10 materias disponibles e inscribe hasta 3 materias sin repetir profesor.</p>
+        <a routerLink="/catalog" class="btn-go-catalog">
+          Ir al Catálogo de Materias
+        </a>
+      </div>
+    } @else {
+      <div class="table-card">
+        <div class="table-card-header">
+          <span class="header-label">Resumen de Créditos</span>
+          <span class="badge-credits">
+            {{ summary.totalCredits }} de 9 Créditos ({{ summary.enrolledCoursesCount }}/3 Materias)
+          </span>
+        </div>
+
+        <table class="enrollments-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Materia</th>
+              <th>Docente Asignado</th>
+              <th class="text-center">Créditos</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of summary.courses; track item.enrollmentId) {
+              <tr>
+                <td class="font-bold text-dark">{{ item.courseCode }}</td>
+                <td class="font-semibold text-dark">{{ item.courseName }}</td>
+                <td class="text-muted">👨‍🏫 {{ item.professorName }}</td>
+                <td class="text-center">
+                  <span class="badge-single-credit">3 CR</span>
+                </td>
+                <td class="text-right">
+                  <button (click)="openClassmatesModal(item)" class="btn-classmates">
+                    👥 Ver Compañeros
+                  </button>
+                  <button (click)="onDrop(item)" class="btn-drop">
+                    Retirar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- Modal de Compañeros de Clase (Privacidad Preservada: Solo Nombres) -->
+  @if (activeModalCourse()) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Compañeros de Clase</h3>
+            <span class="modal-subtitle">{{ activeModalCourse()?.courseName }} ({{ activeModalCourse()?.courseCode }})</span>
+          </div>
+          <button (click)="closeModal()" class="btn-close">✕</button>
+        </div>
+
+        <div class="privacy-alert">
+          🔒 <strong>Política de Privacidad:</strong> Por protección de datos institucionales, en esta consulta únicamente se visualiza el nombre completo de los alumnos matriculados.
+        </div>
+
+        @if (loadingClassmates()) {
+          <div class="loading-state">Cargando lista de compañeros...</div>
+        } @else if (classmates().length === 0) {
+          <div class="empty-classmates">Aún no hay otros compañeros matriculados en esta clase.</div>
+        } @else {
+          <ul class="classmates-list">
+            @for (c of classmates(); track c.id) {
+              <li class="classmate-item">
+                <div class="avatar-circle">
+                  🎓
+                </div>
+                <span>{{ c.fullName }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="modal-footer">
+          <button (click)="closeModal()" class="btn-modal-close">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

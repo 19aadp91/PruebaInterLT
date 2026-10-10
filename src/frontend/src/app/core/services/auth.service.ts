@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { AuthResponse, UserProfileDto } from '../models/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { AuthResponse, UserProfileDto } from '../models/models';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly apiUrl = 'http://localhost:5000/api/v1/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   private readonly tokenKey = 'student_app_token';
   private readonly userKey = 'student_app_user';
@@ -54,7 +55,11 @@ export class AuthService {
   }
 
   private getStoredUser(): UserProfileDto | null {
-    const raw = localStorage.getItem(this.userKey);
-    return raw ? JSON.parse(raw) : null;
+    try {
+      const raw = localStorage.getItem(this.userKey);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
   }
 }

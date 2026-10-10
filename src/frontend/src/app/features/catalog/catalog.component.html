@@ -1,0 +1,90 @@
+﻿<div class="catalog-container">
+  
+  <!-- Panel de Estado y Reglas de Negocio -->
+  <div class="status-panel">
+    <div class="status-header">
+      <div>
+        <h1 class="catalog-title">Catálogo de Asignaturas Disponibles</h1>
+        <p class="catalog-subtitle">
+          Programa de Créditos Académicos · Cada materia equivale a <strong>3 créditos</strong>.
+        </p>
+      </div>
+
+      <!-- Medidor de Créditos Reactivo con Signals -->
+      <div class="credit-counter">
+        <div class="counter-label">Tu Carga Actual</div>
+        <div class="counter-value">
+          {{ currentCredits() }} / 9 <span class="counter-unit">créditos</span>
+        </div>
+        <div class="counter-count">
+          {{ currentCount() }} de 3 materias inscritas
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner de Regla de Negocio Obligatoria -->
+    <div class="rule-banner">
+      <span>⚖️</span>
+      <span><strong>Regla institucional innegociable:</strong> El estudiante no puede tener materias con el mismo docente. Las materias incompatibles se inhabilitan automáticamente.</span>
+    </div>
+  </div>
+
+  <!-- Alertas de éxito o error -->
+  @if (actionMessage()) {
+    <div class="alert-success">
+      {{ actionMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="alert-error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Grid de las 10 Materias -->
+  <div class="course-grid">
+    @for (course of academicService.courses(); track course.id) {
+      <div class="course-card"
+           [class.card-enrolled]="isEnrolled(course)"
+           [class.card-conflict]="isConflict(course)">
+        
+        <div>
+          <div class="card-meta">
+            <span class="course-code">{{ course.code }}</span>
+            <span class="credits-badge">3 Créditos</span>
+          </div>
+
+          <h3 class="course-name">{{ course.name }}</h3>
+
+          <div class="professor-row">
+            <span>👨‍🏫</span>
+            <span class="professor-name">{{ course.professor.fullName }}</span>
+          </div>
+        </div>
+
+        <!-- Zona de Acción y Estado -->
+        <div class="card-action">
+          @if (isEnrolled(course)) {
+            <div class="badge-enrolled">
+              ✓ Asignatura Inscrita
+            </div>
+          } @else if (isConflict(course)) {
+            <div class="badge-conflict">
+              ⛔ Incompatible: Docente ya seleccionado en otra materia
+            </div>
+          } @else if (isMaxReached()) {
+            <div class="badge-max">
+              Límite máximo de 3 materias alcanzado
+            </div>
+          } @else {
+            <button (click)="onEnroll(course)" [disabled]="loadingCourseId() === course.id" class="btn-enroll">
+              {{ loadingCourseId() === course.id ? 'Inscribiendo...' : '+ Inscribir Materia' }}
+            </button>
+          }
+        </div>
+
+      </div>
+    }
+  </div>
+
+</div>

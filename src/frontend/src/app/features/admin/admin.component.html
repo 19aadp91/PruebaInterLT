@@ -1,0 +1,88 @@
+﻿<div class="admin-container">
+  <h1 class="page-title">Panel Administrativo Académico</h1>
+  <p class="page-subtitle">Gestión de docentes, asignaturas y oferta académica (RF-8)</p>
+
+  @if (alertMessage()) {
+    <div class="alert-success">
+      {{ alertMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="alert-error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <div class="admin-grid">
+    
+    <!-- Sección: Profesores -->
+    <div class="admin-card">
+      <h2 class="card-title">Docentes</h2>
+
+      <form (ngSubmit)="onCreateProfessor()" class="admin-form">
+        <h4 class="form-title">+ Nuevo Profesor</h4>
+        <div class="input-row">
+          <input type="text" [(ngModel)]="newProfName" name="profName" placeholder="Nombre completo" required class="flex-input" />
+          <input type="email" [(ngModel)]="newProfEmail" name="profEmail" placeholder="Correo institucional" required class="flex-input" />
+        </div>
+        <button type="submit" class="btn-create">
+          Crear Profesor
+        </button>
+      </form>
+
+      <ul class="item-list">
+        @for (prof of professors(); track prof.id) {
+          <li class="item-row">
+            <div>
+              <div class="item-name">{{ prof.fullName }}</div>
+              <div class="item-email">{{ prof.email }}</div>
+            </div>
+            <button (click)="onDeleteProfessor(prof.id)" class="btn-deactivate">
+              Desactivar
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Sección: Asignaturas -->
+    <div class="admin-card">
+      <h2 class="card-title">Asignaturas Ofertadas</h2>
+
+      <form (ngSubmit)="onCreateCourse()" class="admin-form">
+        <h4 class="form-title">+ Nueva Asignatura (3 Créditos)</h4>
+        <div class="course-inputs">
+          <input type="text" [(ngModel)]="newCourseCode" name="courseCode" placeholder="Código (ej. MAT-103)" required class="form-control" />
+          <input type="text" [(ngModel)]="newCourseName" name="courseName" placeholder="Nombre de la materia" required class="form-control" />
+        </div>
+        <div class="select-container">
+          <select [(ngModel)]="selectedProfId" name="selectedProfId" required class="form-select">
+            <option value="">-- Seleccionar Docente Asignado --</option>
+            @for (p of professors(); track p.id) {
+              <option [value]="p.id">{{ p.fullName }}</option>
+            }
+          </select>
+        </div>
+        <button type="submit" class="btn-create">
+          Crear Asignatura
+        </button>
+      </form>
+
+      <ul class="item-list">
+        @for (course of academicService.courses(); track course.id) {
+          <li class="item-row">
+            <div>
+              <span class="course-code-badge">{{ course.code }}</span>
+              <span class="course-title">{{ course.name }}</span>
+              <div class="item-professor">👨‍🏫 {{ course.professor.fullName }}</div>
+            </div>
+            <button (click)="onDeleteCourse(course.id)" class="btn-deactivate">
+              Desactivar
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,41 @@
+﻿<div class="register-card">
+  <h2>Registro de Estudiante</h2>
+  <p class="subtitle">Adhiérete al programa de créditos académicos en línea</p>
+
+  @if (errorMessage()) {
+    <div class="alert-error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Nombre Completo *</label>
+      <input type="text" [(ngModel)]="fullName" name="fullName" required placeholder="Ej: Juan David Rodríguez" />
+    </div>
+
+    <div class="form-group">
+      <label>Documento de Identificación *</label>
+      <input type="text" [(ngModel)]="identificationNumber" name="identificationNumber" required placeholder="Ej: 1020304050" />
+    </div>
+
+    <div class="form-group">
+      <label>Correo Electrónico Institucional *</label>
+      <input type="email" [(ngModel)]="email" name="email" required placeholder="juan.rodriguez@universidad.edu.co" />
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña (mínimo 6 caracteres) *</label>
+      <input type="password" [(ngModel)]="password" name="password" required minlength="6" placeholder="Crea una contraseña segura" />
+    </div>
+
+    <button type="submit" [disabled]="loading()" class="btn-submit">
+      {{ loading() ? 'Registrando...' : 'Completar Registro' }}
+    </button>
+  </form>
+
+  <div class="footer-links">
+    ¿Ya estás registrado?
+    <a routerLink="/login">Inicia sesión</a>
+  </div>
+</div>

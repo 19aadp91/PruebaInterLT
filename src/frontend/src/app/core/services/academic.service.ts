@@ -9,13 +9,14 @@ import {
   ClassmateDto,
   ProfessorDto
 } from '../models/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AcademicService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:5000/api/v1';
+  private readonly baseUrl = environment.apiUrl;
 
   // Signals globales de estado académico
   readonly courses = signal<CourseDto[]>([]);

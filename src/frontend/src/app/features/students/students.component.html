@@ -1,0 +1,40 @@
+<div class="students-container">
+  <div class="header-section">
+    <h1 class="page-title">Directorio de Estudiantes Registrados</h1>
+    <p class="page-subtitle">Comunidad académica vinculada al programa de créditos</p>
+  </div>
+
+  <div class="privacy-alert">
+    🔒 <strong>Aislamiento de Privacidad (RF-6):</strong> En esta vista pública institucional solo se expone el nombre de los alumnos registrados. Los documentos de identidad y correos electrónicos permanecen protegidos.
+  </div>
+
+  <div class="table-card">
+    <table class="students-table">
+      <thead>
+        <tr>
+          <th class="col-number">#</th>
+          <th>Nombre Completo del Estudiante</th>
+          <th class="text-right">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (student of academicService.publicStudents(); track student.id; let i = $index) {
+          <tr>
+            <td class="col-number-val">{{ i + 1 }}</td>
+            <td class="student-name-cell">
+              <div class="avatar-badge">
+                {{ student.fullName.charAt(0) }}
+              </div>
+              <span>{{ student.fullName }}</span>
+            </td>
+            <td class="text-right">
+              <span class="badge-active">
+                Activo
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

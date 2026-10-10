@@ -1,0 +1,139 @@
+﻿.navbar-header {
+  background: #1e293b;
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-badge {
+  background: #f97316;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.brand-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: white;
+  background: #334155;
+}
+
+.nav-admin {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.active-nav {
+  background: #334155 !important;
+  color: white !important;
+}
+
+.credits-badge {
+  background: #ea580c;
+  color: white;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  margin-left: 0.35rem;
+}
+
+.user-profile-group {
+  border-left: 1px solid #334155;
+  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.btn-logout {
+  background: #334155;
+  color: #f1f5f9;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.btn-logout:hover {
+  background: #475569;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-login {
+  color: #f1f5f9;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-login:hover {
+  background: #334155;
+}
+
+.btn-register {
+  background: #f97316;
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-register:hover {
+  background: #ea580c;
+}
