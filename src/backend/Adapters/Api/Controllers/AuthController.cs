@@ -1,6 +1,6 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
-using Application.Features.Auth;
+using Application.Features.Auth.Commands;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;

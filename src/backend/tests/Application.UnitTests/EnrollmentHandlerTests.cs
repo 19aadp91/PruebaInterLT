@@ -1,6 +1,7 @@
 using Application.DTOs;
-using Application.Features.Catalog;
-using Application.Features.Enrollments;
+using Application.Features.Catalog.Queries;
+using Application.Features.Enrollments.Commands;
+using Application.Features.Enrollments.Queries;
 using Application.Ports;
 using Domain.Entities;
 using Domain.Exceptions;

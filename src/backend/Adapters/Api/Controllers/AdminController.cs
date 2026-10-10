@@ -1,7 +1,7 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
-using Application.Features.Admin;
-using Application.Features.Catalog;
+using Application.Features.Admin.Commands;
+using Application.Features.Catalog.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

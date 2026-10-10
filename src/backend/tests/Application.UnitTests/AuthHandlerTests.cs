@@ -1,4 +1,4 @@
-using Application.Features.Auth;
+using Application.Features.Auth.Commands;
 using Application.Ports;
 using Domain.Entities;
 using Domain.Exceptions;

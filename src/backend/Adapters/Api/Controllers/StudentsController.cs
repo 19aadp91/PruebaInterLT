@@ -1,7 +1,8 @@
 using Application.Common.Dispatcher;
 using Application.DTOs;
-using Application.Features.Catalog;
-using Application.Features.Enrollments;
+using Application.Features.Catalog.Queries;
+using Application.Features.Enrollments.Commands;
+using Application.Features.Enrollments.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
