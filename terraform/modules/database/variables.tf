@@ -21,7 +21,7 @@ variable "rds_security_group_id" {
 variable "db_instance_class" {
   description = "Clase de instancia para Amazon RDS SQL Server"
   type        = string
-  default     = "db.t3.small"
+  default     = "db.t3.micro"
 }
 
 variable "allocated_storage" {

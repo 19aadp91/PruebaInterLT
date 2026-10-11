@@ -30,7 +30,7 @@ resource "aws_db_instance" "sqlserver" {
   multi_az               = var.multi_az
 
   auto_minor_version_upgrade = true
-  backup_retention_period   = 7
+  backup_retention_period   = 0 # 0 para compatibilidad con cuentas Free Tier / pruebas
   skip_final_snapshot       = true # Ajustar a false para ambientes de producción con retención estricta
   deletion_protection       = false
 

@@ -22,3 +22,8 @@ output "rds_endpoint" {
   description = "Punto de enlace privado de Amazon RDS SQL Server"
   value       = module.database.db_endpoint
 }
+
+output "ecr_repository_url" {
+  description = "URI del repositorio Amazon ECR"
+  value       = module.ecs_fargate.ecr_repository_url
+}

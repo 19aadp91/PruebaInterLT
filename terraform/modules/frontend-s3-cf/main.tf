@@ -1,6 +1,8 @@
+data "aws_caller_identity" "current" {}
+
 # Bucket S3 Privado para hospedar los assets estáticos de Angular 21
 resource "aws_s3_bucket" "frontend" {
-  bucket        = "${var.project_name}-${var.environment}-frontend-assets"
+  bucket        = "${var.project_name}-${var.environment}-${data.aws_caller_identity.current.account_id}-frontend"
   force_destroy = true
 
   tags = {
@@ -50,6 +52,37 @@ resource "aws_cloudfront_distribution" "cdn" {
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
     origin_id                = "S3-${aws_s3_bucket.frontend.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
+  }
+
+  dynamic "origin" {
+    for_each = var.alb_dns_name != "" ? [1] : []
+    content {
+      domain_name = var.alb_dns_name
+      origin_id   = "ALB-${var.alb_dns_name}"
+
+      custom_origin_config {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "http-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = var.alb_dns_name != "" ? [1] : []
+    content {
+      path_pattern     = "/api/*"
+      allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+      cached_methods   = ["GET", "HEAD"]
+      target_origin_id = "ALB-${var.alb_dns_name}"
+
+      cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+      origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac"
+
+      viewer_protocol_policy = "redirect-to-https"
+      compress               = true
+    }
   }
 
   default_cache_behavior {

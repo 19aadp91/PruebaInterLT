@@ -1,0 +1,111 @@
+name: CI - Integración Continua
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # 1. Pruebas y Compilación del Backend (.NET 8 Clean Architecture)
+  # ----------------------------------------------------------------------------
+  backend-ci:
+    name: Backend CI (.NET 8 & Tests)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar dependencias de la solución
+        run: dotnet restore src/backend/Adapters/Api/Api.csproj
+
+      - name: Compilar solución
+        run: dotnet build src/backend/StudentRegistration.slnx -c Release --no-restore
+
+      - name: Ejecutar pruebas unitarias (Domain & Application)
+        run: dotnet test src/backend/StudentRegistration.slnx -c Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+
+  # ----------------------------------------------------------------------------
+  # 2. Compilación del Frontend (Angular 21 Zoneless)
+  # ----------------------------------------------------------------------------
+  frontend-ci:
+    name: Frontend CI (Angular 21 Build)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: src/frontend
+        run: npm ci
+
+      - name: Compilar Angular para producción
+        working-directory: src/frontend
+        run: npm run build
+
+  # ----------------------------------------------------------------------------
+  # 3. Validación de Contenerización Docker (Multi-Stage)
+  # ----------------------------------------------------------------------------
+  docker-ci:
+    name: Docker CI (Build Verification)
+    runs-on: ubuntu-latest
+    needs: [backend-ci]
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construir imagen Docker de la API (Dry-Run)
+        working-directory: src/backend
+        run: |
+          docker build -t student-api:ci .
+
+  # ----------------------------------------------------------------------------
+  # 4. Validación de Infraestructura (Terraform Lint & Validate)
+  # ----------------------------------------------------------------------------
+  terraform-ci:
+    name: Terraform CI (Lint & Validate)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Verificar formateo de código Terraform
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+
+      - name: Inicializar módulos locales (sin backend remoto)
+        working-directory: terraform
+        run: terraform init -backend=false
+
+      - name: Validar configuración sintáctica
+        working-directory: terraform
+        run: terraform validate

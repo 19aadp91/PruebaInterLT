@@ -33,3 +33,9 @@ variable "container_image" {
   type        = string
   default     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/student-registration-api:latest"
 }
+
+variable "desired_count" {
+  description = "Numero deseado de replicas para las tareas ECS Fargate"
+  type        = number
+  default     = 1
+}

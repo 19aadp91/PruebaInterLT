@@ -17,3 +17,13 @@ output "ecs_service_name" {
   description = "Nombre del servicio ECS"
   value       = aws_ecs_service.api.name
 }
+
+output "ecr_repository_url" {
+  description = "URI del repositorio Amazon ECR"
+  value       = aws_ecr_repository.api.repository_url
+}
+
+output "ecr_repository_name" {
+  description = "Nombre del repositorio Amazon ECR"
+  value       = aws_ecr_repository.api.name
+}

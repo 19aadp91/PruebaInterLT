@@ -1,3 +1,18 @@
+# Repositorio ECR para almacenar las imágenes de la API
+resource "aws_ecr_repository" "api" {
+  name                 = "${var.project_name}-${var.environment}-api"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Environment = var.environment
+  }
+}
+
 # Clúster de ECS Fargate
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-${var.environment}-cluster"

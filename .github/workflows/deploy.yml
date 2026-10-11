@@ -1,0 +1,111 @@
+name: CD - Despliegue Continuo en AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente de destino para el despliegue'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - qa
+          - dev
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # 1. Despliegue de la API Backend en AWS ECS Fargate
+  # ----------------------------------------------------------------------------
+  deploy-backend:
+    name: Desplegar Backend (.NET 8 -> Amazon ECS Fargate)
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'prod' }}
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Iniciar sesión en Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Construir y etiquetar imagen Docker
+        working-directory: src/backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY || 'student-registration-api' }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Desplegar nueva versión en AWS ECS Fargate
+        env:
+          ECS_CLUSTER: ${{ secrets.AWS_ECS_CLUSTER || 'student-registration-prod-cluster' }}
+          ECS_SERVICE: ${{ secrets.AWS_ECS_SERVICE || 'student-registration-prod-service' }}
+        run: |
+          echo "Forzando nuevo despliegue del servicio Fargate..."
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
+
+  # ----------------------------------------------------------------------------
+  # 2. Despliegue de la SPA Frontend en Amazon S3 y CloudFront
+  # ----------------------------------------------------------------------------
+  deploy-frontend:
+    name: Desplegar Frontend (Angular 21 -> Amazon S3 + CloudFront)
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'prod' }}
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Instalar dependencias de Angular
+        working-directory: src/frontend
+        run: npm ci
+
+      - name: Compilar Frontend en modo producción
+        working-directory: src/frontend
+        run: npm run build
+
+      - name: Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Sincronizar archivos estáticos con el bucket S3 privado
+        run: |
+          echo "Sincronizando dist con S3..."
+          aws s3 sync src/frontend/dist/frontend/browser/ s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete \
+          || aws s3 sync src/frontend/dist/frontend/ s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
+
+      - name: Invalidar caché global de Amazon CloudFront
+        run: |
+          echo "Creando invalidación de CloudFront..."
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"

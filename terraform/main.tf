@@ -86,6 +86,7 @@ module "ecs_fargate" {
   ecs_execution_role_arn   = module.security.ecs_execution_role_arn
   ecs_task_role_arn        = module.security.ecs_task_role_arn
   container_image          = var.container_image
+  desired_count            = var.desired_count
   db_connection_secret_arn = module.secrets.db_connection_secret_arn
   jwt_secret_arn           = module.secrets.jwt_secret_arn
 }
@@ -96,4 +97,5 @@ module "frontend" {
 
   project_name = var.project_name
   environment  = var.environment
+  alb_dns_name = module.ecs_fargate.alb_dns_name
 }
