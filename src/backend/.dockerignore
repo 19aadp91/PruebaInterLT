@@ -1,0 +1,9 @@
+**/.vs
+**/.git
+**/.github
+**/bin
+**/obj
+**/*.user
+**/*.suo
+**/TestResults
+**/*.md

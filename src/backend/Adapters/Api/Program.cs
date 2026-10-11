@@ -38,6 +38,14 @@ app.UseAuthorization();
 // Redirección opcional desde raíz / hacia la documentación Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
+// Health check para Application Load Balancer (ALB) y ECS Fargate
+app.MapGet("/healthz", () => Results.Ok(new
+{
+    status = "Healthy",
+    service = "StudentRegistrationApi",
+    timestamp = DateTimeOffset.UtcNow
+}));
+
 app.MapControllers();
 
 app.Run();
