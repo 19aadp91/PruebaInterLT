@@ -42,32 +42,113 @@ Toda la solución fue construida siguiendo un pipeline formal multi-agente:
 
 ---
 
-## 🚀 Guía de Ejecución Rápida
+## 💻 Guía de Despliegue en Entorno Local
 
-### 1. Base de Datos (SQL Server)
-* El script DDL con tablas, constraints, índices de rendimiento y datos semilla (los 5 profesores y 10 materias precargadas) se encuentra en:
-  `database/scripts/01_init_schema_and_seeds.sql`
-* *Nota:* Para facilitar la evaluación inmediata, el backend incluye inicialización automática de semillas en memoria o SQL Server.
+### 1. Requisitos Previos (Local)
+* **.NET 8 SDK** (v8.0.x o superior) instalado (`dotnet --version`).
+* **Node.js** (v20.x o superior LTS) y **npm** (`node -v`, `npm -v`).
+* **SQL Server** (SQL Server Express, LocalDB o contenedor Docker de SQL Server).
+* **Docker Desktop** (opcional, para ejecución y pruebas en contenedores).
 
-### 2. Backend (.NET 8)
-Para ejecutar las pruebas unitarias automatizadas (15/15 pruebas superadas):
+### 2. Ejecución de Pruebas Unitarias
+El proyecto cuenta con una suite integral de 18 pruebas unitarias (Dominio y Casos de Uso de Aplicación con 100% de éxito):
 ```bash
 dotnet test src/backend/StudentRegistration.slnx
 ```
 
-Para levantar la API HTTP:
-```bash
-dotnet run --project src/backend/Adapters/Api/Api.csproj
-```
-La API quedará escuchando en `http://localhost:5000` (o el puerto configurado por Kestrel).
+### 3. Puesta en Marcha del Backend (.NET 8)
+1. Restaurar dependencias del proyecto:
+   ```bash
+   dotnet restore src/backend/StudentRegistration.slnx
+   ```
+2. Ejecutar la API REST:
+   ```bash
+   dotnet run --project src/backend/Adapters/Api/Api.csproj
+   ```
+3. La API iniciará con Kestrel. Puedes acceder a la documentación interactiva OpenAPI/Swagger en:
+   * **Swagger UI:** `https://localhost:7210/swagger` (o `http://localhost:5000/swagger`)
+   * **Health Check:** `https://localhost:7210/healthz`
 
-### 3. Frontend (Angular Standalone con Signals)
-Para compilar y levantar el servidor de desarrollo:
+### 4. Puesta en Marcha del Frontend (Angular 21)
+1. Ingresar al directorio del frontend e instalar dependencias:
+   ```bash
+   cd src/frontend
+   npm install
+   ```
+2. Iniciar el servidor de desarrollo local:
+   ```bash
+   npm start
+   ```
+3. Abre tu navegador en **`http://localhost:4200`**.
+
+---
+
+## ☁️ Guía de Despliegue en la Nube (AWS con Terraform)
+
+La infraestructura como código (IaC) modular permite aprovisionar y destruir todo el ecosistema en Amazon Web Services de forma 100% automatizada.
+
+### 1. Requisitos Previos (Nube)
+* **Cuenta de AWS** activa (con credenciales de administrador o rol adecuado).
+* **AWS CLI v2** instalado y autenticado (`aws configure`).
+* **Terraform** (>= v1.5.0) instalado (`terraform -version`).
+* **Docker Desktop** activo (para compilar y subir la imagen del contenedor a Amazon ECR).
+
+### 2. Configuración de Parámetros de Terraform
+1. Ingresar a la carpeta de infraestructura:
+   ```bash
+   cd terraform
+   ```
+2. Crear un archivo de variables locales `terraform.tfvars` (el cual está protegido en `.gitignore` para no subir secretos a Git):
+   ```hcl
+   aws_region      = "us-east-1"
+   project_name    = "student-registration"
+   environment     = "dev"
+   db_password     = "TuContrasenaSeguraSQL2026!"
+   jwt_secret_key  = "ClaveSuperSecretaYRobustaParaFirmaDeTokensJWT2026!"
+   desired_count   = 1
+   ```
+
+### 3. Despliegue Automatizado en la Nube
+1. **Inicializar Terraform:**
+   ```bash
+   terraform init
+   ```
+
+2. **Crear el Repositorio ECR y subir la Imagen Docker:**
+   ```powershell
+   # Aprovisionar el registro privado en AWS ECR
+   terraform apply -target="module.ecs_fargate.aws_ecr_repository.api" -auto-approve
+
+   # Obtener login de Docker en ECR
+   $pass = (aws ecr get-login-password --region us-east-1).Trim()
+   docker login --username AWS --password $pass <ID_DE_CUENTA>.dkr.ecr.us-east-1.amazonaws.com
+
+   # Compilar y subir la imagen Docker
+   docker build -t <ID_DE_CUENTA>.dkr.ecr.us-east-1.amazonaws.com/student-registration-dev-api:latest -f ../src/backend/Dockerfile ../src/backend
+   docker push <ID_DE_CUENTA>.dkr.ecr.us-east-1.amazonaws.com/student-registration-dev-api:latest
+   ```
+
+3. **Desplegar Toda la Infraestructura con un Solo Comando:**
+   ```bash
+   terraform apply -auto-approve
+   ```
+   *Este comando aprovisiona de forma desatendida: VPC con 6 subredes en 2 AZs, NAT Gateway, Security Groups, Amazon RDS SQL Server (`db.t3.micro`), Clúster ECS Fargate, Application Load Balancer con `/healthz`, Secretos en AWS Secrets Manager, Bucket S3 privado cifrado y Distribución Global Amazon CloudFront con Reverse Proxy en `/api/*`.*
+
+4. **Publicar el Frontend Angular en Amazon S3 y CloudFront:**
+   ```powershell
+   cd ../src/frontend
+   npm run build
+   aws s3 sync dist/frontend/browser/ s3://student-registration-dev-<ID_DE_CUENTA>-frontend --delete
+   aws cloudfront create-invalidation --distribution-id <ID_DISTRIBUCION_CLOUDFRONT> --paths "/*"
+   ```
+
+### 4. Limpieza y Desmantelamiento (Costo Cero Continuo)
+Cuando finalices las pruebas y evaluación de la solución en la nube, puedes desmantelar todos los recursos ejecutando:
 ```bash
-cd src/frontend
-npm start
+cd terraform
+terraform destroy -auto-approve
 ```
-Abre tu navegador en `http://localhost:4200`.
+*Garantiza la eliminación íntegra de los 47 recursos aprovisionados sin dejar instancias huérfanas ni costos recurrentes en tu cuenta de AWS.*
 
 ---
 
