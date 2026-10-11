@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: API de Registro de Estudiantes e Inscripción Académica
   version: 1.0.0
-  description: Contrato canónico de API REST para el sistema de registro de estudiantes, inscripción con regla de profesor único y administración académica.
+  description: Contrato canónico de API REST para el Sistema de Registro de Estudiantes y Selección de Materias. Sincronizado estrictamente con los controladores de ASP.NET Core 8, el patrón de envoltura Result<T>, CQRS y especificaciones de dominio.
 servers:
   - url: /api/v1
     description: Servidor de API v1
@@ -25,15 +25,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/AuthResult'
         '400':
           description: Datos inválidos o contraseña menor a 6 caracteres
           content:
-            application/problem+json:
+            application/json:
               schema:
-                $ref: '#/components/schemas/ProblemDetails'
+                $ref: '#/components/schemas/AuthResult'
         '409':
           description: Documento o correo electrónico ya registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -42,7 +48,7 @@ paths:
   /auth/login:
     post:
       summary: Inicio de sesión
-      description: Autentica un usuario y devuelve un token Bearer JWT.
+      description: Autentica un usuario (Estudiante o Administrador) y devuelve un token Bearer JWT con su perfil.
       operationId: login
       requestBody:
         required: true
@@ -56,9 +62,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/AuthResult'
         '401':
           description: Credenciales incorrectas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -77,11 +89,15 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PublicStudentDto'
+                $ref: '#/components/schemas/PublicStudentsResult'
         '401':
           description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -90,7 +106,7 @@ paths:
   /students/me:
     get:
       summary: Perfil del estudiante autenticado
-      description: Retorna la información del perfil del estudiante en sesión.
+      description: Retorna la información del perfil del estudiante en sesión incluyendo total de créditos y materias inscritas.
       operationId: getCurrentStudentProfile
       security:
         - BearerAuth: []
@@ -100,9 +116,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentProfileDto'
+                $ref: '#/components/schemas/StudentProfileResult'
         '401':
           description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '404':
+          description: Perfil de estudiante no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentProfileResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -111,7 +139,7 @@ paths:
   /students/me/enrollments:
     get:
       summary: Materias inscritas del estudiante autenticado
-      description: Retorna la lista de asignaturas inscritas por el estudiante y el total de créditos acumulados.
+      description: Retorna el resumen de asignaturas inscritas por el estudiante, cupos de créditos (0 a 9) y materias cursadas.
       operationId: getMyEnrollments
       security:
         - BearerAuth: []
@@ -121,9 +149,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentEnrollmentSummaryDto'
+                $ref: '#/components/schemas/StudentEnrollmentSummaryResult'
         '401':
           description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -147,15 +181,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentEnrollmentSummaryDto'
+                $ref: '#/components/schemas/StudentEnrollmentSummaryResult'
         '400':
-          description: Límite de créditos/materias superado o violación de regla de profesor no repetido
+          description: Límite de créditos/materias superado o violación de regla de profesor repetido
           content:
-            application/problem+json:
+            application/json:
               schema:
-                $ref: '#/components/schemas/ProblemDetails'
+                $ref: '#/components/schemas/StudentEnrollmentSummaryResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
         '409':
-          description: Materia ya inscrita por el estudiante
+          description: Materia ya se encuentra inscrita en la carga académica
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentEnrollmentSummaryResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -181,9 +227,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentEnrollmentSummaryDto'
+                $ref: '#/components/schemas/StudentEnrollmentSummaryResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
         '404':
           description: La materia no se encuentra inscrita
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentEnrollmentSummaryResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -202,11 +260,15 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CourseDto'
+                $ref: '#/components/schemas/CoursesResult'
         '401':
           description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -232,11 +294,21 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ClassmateDto'
+                $ref: '#/components/schemas/ClassmatesResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
         '404':
           description: Materia no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassmatesResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -245,20 +317,33 @@ paths:
   /admin/professors:
     get:
       summary: Listar todos los profesores (Admin)
+      description: Retorna la lista de docentes activos disponibles en la institución.
       operationId: adminGetProfessors
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Listado de profesores
+          description: Listado de profesores obtenido
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProfessorDto'
+                $ref: '#/components/schemas/ProfessorsResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '500':
+          description: Error interno no controlado del servidor
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
     post:
       summary: Crear profesor (Admin)
+      description: Registra un nuevo docente en la planta institucional.
       operationId: adminCreateProfessor
       security:
         - BearerAuth: []
@@ -267,43 +352,43 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateProfessorRequest'
+              $ref: '#/components/schemas/AdminCreateProfessorRequest'
       responses:
         '201':
           description: Profesor creado exitosamente
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfessorDto'
-
-  /admin/professors/{id}:
-    put:
-      summary: Actualizar profesor (Admin)
-      operationId: adminUpdateProfessor
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateProfessorRequest'
-      responses:
-        '200':
-          description: Profesor actualizado exitosamente
+                $ref: '#/components/schemas/ProfessorResult'
+        '400':
+          description: Datos de entrada inválidos
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfessorDto'
+                $ref: '#/components/schemas/ProfessorResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '409':
+          description: Ya existe un docente con el correo electrónico proporcionado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfessorResult'
+        '500':
+          description: Error interno no controlado del servidor
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /admin/professors/{id}:
     delete:
-      summary: Desactivar profesor (Admin)
+      summary: Desactivar o eliminar profesor (Admin)
+      description: Elimina un docente siempre que no tenga materias asignadas con alumnos inscritos.
       operationId: adminDeleteProfessor
       security:
         - BearerAuth: []
@@ -315,10 +400,32 @@ paths:
             type: string
             format: uuid
       responses:
-        '204':
-          description: Profesor desactivado
+        '200':
+          description: Docente eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '404':
+          description: Docente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
         '409':
-          description: El profesor tiene materias con alumnos inscritos activos
+          description: Conflicto, el docente tiene asignaturas activas asignadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -327,20 +434,33 @@ paths:
   /admin/courses:
     get:
       summary: Listar todas las materias (Admin)
+      description: Retorna el catálogo completo de asignaturas académicas.
       operationId: adminGetCourses
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Listado de materias
+          description: Listado de materias obtenido
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CourseDto'
+                $ref: '#/components/schemas/CoursesResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '500':
+          description: Error interno no controlado del servidor
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
     post:
       summary: Crear materia (Admin)
+      description: Registra una nueva asignatura asignándole código, nombre y profesor responsable (créditos fijados en 3 automáticamente).
       operationId: adminCreateCourse
       security:
         - BearerAuth: []
@@ -349,43 +469,43 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCourseRequest'
+              $ref: '#/components/schemas/AdminCreateCourseRequest'
       responses:
         '201':
           description: Materia creada exitosamente
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CourseDto'
-
-  /admin/courses/{id}:
-    put:
-      summary: Actualizar materia o reasignar profesor (Admin)
-      operationId: adminUpdateCourse
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateCourseRequest'
-      responses:
-        '200':
-          description: Materia actualizada exitosamente
+                $ref: '#/components/schemas/CourseResult'
+        '400':
+          description: Datos de entrada inválidos
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CourseDto'
+                $ref: '#/components/schemas/CourseResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '409':
+          description: Ya existe una asignatura con el código proporcionado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseResult'
+        '500':
+          description: Error interno no controlado del servidor
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /admin/courses/{id}:
     delete:
-      summary: Desactivar materia (Admin)
+      summary: Desactivar o eliminar materia (Admin)
+      description: Elimina una materia curricular siempre que no tenga alumnos matriculados.
       operationId: adminDeleteCourse
       security:
         - BearerAuth: []
@@ -397,10 +517,32 @@ paths:
             type: string
             format: uuid
       responses:
-        '204':
-          description: Materia desactivada
+        '200':
+          description: Materia eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '404':
+          description: Materia no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
         '409':
-          description: La materia tiene inscripciones activas
+          description: Conflicto, la materia posee inscripciones activas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResult'
+        '500':
+          description: Error interno no controlado del servidor
           content:
             application/problem+json:
               schema:
@@ -414,6 +556,253 @@ components:
       bearerFormat: JWT
 
   schemas:
+    ErrorType:
+      type: integer
+      description: Código numérico del tipo de resultado o error funcional
+      enum:
+        - 0 # None
+        - 1 # Validation
+        - 2 # BadRequest
+        - 3 # Unauthorized
+        - 4 # Forbidden
+        - 5 # NotFound
+        - 6 # Conflict
+        - 7 # InternalServerError
+      example: 0
+
+    BaseResult:
+      type: object
+      description: Envoltura canónica Result para operaciones sin valor de retorno
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+          example: 'Operación completada exitosamente.'
+        errors:
+          type: array
+          items:
+            type: string
+          example: []
+        result:
+          type: object
+          nullable: true
+          example: null
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    AuthResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          $ref: '#/components/schemas/AuthResponse'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    PublicStudentsResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicStudentDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    StudentProfileResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          $ref: '#/components/schemas/StudentProfileDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    StudentEnrollmentSummaryResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          $ref: '#/components/schemas/StudentEnrollmentSummaryDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    CoursesResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    ClassmatesResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassmateDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    ProfessorsResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfessorDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    ProfessorResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          $ref: '#/components/schemas/ProfessorDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
+    CourseResult:
+      type: object
+      required:
+        - isSuccess
+        - errors
+        - errorType
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+        result:
+          $ref: '#/components/schemas/CourseDto'
+        errorType:
+          $ref: '#/components/schemas/ErrorType'
+
     RegisterStudentRequest:
       type: object
       required:
@@ -666,7 +1055,7 @@ components:
           type: string
           example: 'María Fernanda Ruiz'
 
-    CreateProfessorRequest:
+    AdminCreateProfessorRequest:
       type: object
       required:
         - fullName
@@ -680,22 +1069,7 @@ components:
           format: email
           example: 'roberto.silva@universidad.edu.co'
 
-    UpdateProfessorRequest:
-      type: object
-      required:
-        - fullName
-        - email
-        - isAvailable
-      properties:
-        fullName:
-          type: string
-        email:
-          type: string
-          format: email
-        isAvailable:
-          type: boolean
-
-    CreateCourseRequest:
+    AdminCreateCourseRequest:
       type: object
       required:
         - code
@@ -708,21 +1082,6 @@ components:
         name:
           type: string
           example: 'Estructuras de Datos'
-        credits:
-          type: integer
-          default: 3
-        professorId:
-          type: string
-          format: uuid
-
-    UpdateCourseRequest:
-      type: object
-      required:
-        - name
-        - professorId
-      properties:
-        name:
-          type: string
         professorId:
           type: string
           format: uuid
@@ -739,13 +1098,13 @@ components:
           example: 'https://tools.ietf.org/html/rfc7807'
         title:
           type: string
-          example: 'Violación de Regla de Negocio'
+          example: 'Error Interno del Servidor'
         status:
           type: integer
-          example: 400
+          example: 500
         detail:
           type: string
-          example: 'No es posible inscribir la materia porque el profesor Andrés Gómez ya dicta otra materia actualmente inscrita.'
+          example: 'Ocurrió un error inesperado al procesar la solicitud.'
         instance:
           type: string
           example: '/api/v1/students/me/enrollments'
