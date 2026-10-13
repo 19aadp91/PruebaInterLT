@@ -1,4 +1,4 @@
-# REPORTE DE CONFORMIDAD ESPECÍFICA Y CONSTITUCIONAL (`spec-compliance-report.md`)
+# REPORTE DE CONFORMIDAD ESPECÍFICA Y CONSTITUCIONAL (`08-spec-compliance-report.md`)
 
 - **Fecha de Evaluación:** 2026-10-08T20:48:00-05:00
 - **Veredicto:** **STATUS: PASSED**

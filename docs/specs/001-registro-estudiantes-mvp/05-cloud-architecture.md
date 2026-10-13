@@ -1,4 +1,4 @@
-# Especificación de Arquitectura Cloud en AWS (`cloud-architecture.md`)
+# Especificación de Arquitectura Cloud en AWS (`05-cloud-architecture.md`)
 
 ## 1. Visión General y Topología
 * **Proveedor Cloud:** Amazon Web Services (AWS).

@@ -25,20 +25,26 @@ Sistema completo de registro de estudiantes y selección de materias cumpliendo 
 * **Regla innegociable de negocio:** Prohibición estricta de cursar materias con el mismo docente (validado en Dominio con *Specification Pattern* y en Frontend con *Signals reactivos* en tiempo real).
 * **Privacidad de datos personales:** Directorio público y vista de compañeros de clase exponiendo única y exclusivamente el nombre completo.
 
+### 3. Documentación Oficial y Manuales en PDF
+Para facilitar la lectura y evaluación ejecutiva, se consolidaron tres expedientes completos en formato PDF con diseño corporativo y diagramas vectorizados:
+* **[Manual de Usuario y Guía Operativa (PDF)](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/MANUAL_DE_USUARIO_REGISTRO_ACADEMICO.pdf):** Manual visual ilustrado de 9 páginas con las 6 capturas reales de la aplicación en producción en CloudFront (Login, Registro, Catálogo reactivo 9/9 CR con bloqueo de profesor, Mis Materias con retiro y compañeros, Directorio con privacidad y Panel Administrativo).
+* **[Expediente de Arquitectura y Solución Técnica Integral (PDF)](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/EXPEDIENTE_ARQUITECTURA_LIDER_TECNICO.pdf):** Dossier de 43 páginas que consolida las 10 respuestas conceptuales clave de nivel Líder Técnico, modernización logística ZYX, arquitectura hexagonal .NET 8, frontend reactivo Angular 21 Signals, esquema relacional SQL Server e infraestructura cloud en AWS con Terraform.
+* **[Expediente Técnico de Especificaciones SDD (PDF)](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/EXPEDIENTE_TECNICO_001_REGISTRO_ESTUDIANTES.pdf):** Consolidación secuencial de los 8 documentos de especificación del MVP (Requisitos EARS, OpenAPI 3.1, SQL Schema, Arquitectura, AWS Cloud, Plan Técnico, Backlog de 28 tareas y Auditoría QA con veredicto PASSED).
+
 ---
 
 ## 🏗️ Artefactos de la Metodología SDD (Spec-Driven Development)
 
 Toda la solución fue construida siguiendo un pipeline formal multi-agente:
 1. **Constitución Técnica:** [docs/constitution.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/constitution.md)
-2. **Especificación Funcional EARS:** [spec.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/spec.md)
-3. **Contrato Canónico OpenAPI 3.1:** [openapi.yaml](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/openapi.yaml)
-4. **Modelo de Base de Datos y ERD:** [schema-spec.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/schema-spec.md)
-5. **Diseño de Arquitectura Hexagonal:** [architecture-spec.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/architecture-spec.md)
-6. **Topología de Nube en AWS:** [cloud-architecture.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/cloud-architecture.md)
-7. **Plan Técnico y Matriz de Tests:** [plan.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/plan.md)
-8. **Backlog de Tareas:** [tasks.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/tasks.md)
-9. **Reporte de Auditoría QA (Veredicto PASSED):** [spec-compliance-report.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/spec-compliance-report.md)
+2. **Especificación Funcional EARS:** [01-spec.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/01-spec.md)
+3. **Contrato Canónico OpenAPI 3.1:** [02-openapi.yaml](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/02-openapi.yaml)
+4. **Modelo de Base de Datos y ERD:** [03-schema-spec.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/03-schema-spec.md)
+5. **Diseño de Arquitectura Hexagonal:** [04-architecture-spec.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/04-architecture-spec.md)
+6. **Topología de Nube en AWS:** [05-cloud-architecture.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/05-cloud-architecture.md)
+7. **Plan Técnico y Matriz de Tests:** [06-plan.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/06-plan.md)
+8. **Backlog de Tareas:** [07-tasks.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/07-tasks.md)
+9. **Reporte de Auditoría QA (Veredicto PASSED):** [08-spec-compliance-report.md](file:///C:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/08-spec-compliance-report.md)
 
 ---
 

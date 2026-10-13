@@ -1,9 +1,9 @@
-# Plan Técnico de Implementación (`plan.md`)
+# Plan Técnico de Implementación (`06-plan.md`)
 
 ## 1. Resumen Ejecutivo
 Este plan técnico consolida la arquitectura modular, las decisiones de diseño, la estructura de componentes y la estrategia de verificación implementada para el MVP del **Sistema de Registro de Estudiantes y Selección de Materias**.
 
-El sistema da cumplimiento riguroso a la especificación de negocio [spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/spec.md), la especificación de contratos [openapi.yaml](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/openapi.yaml), el esquema de base de datos [schema-spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/schema-spec.md) y los principios rectores de [constitution.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/constitution.md).
+El sistema da cumplimiento riguroso a la especificación de negocio [01-spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/01-spec.md), la especificación de contratos [02-openapi.yaml](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/02-openapi.yaml), el esquema de base de datos [03-schema-spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/03-schema-spec.md) y los principios rectores de [constitution.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/constitution.md).
 
 ---
 

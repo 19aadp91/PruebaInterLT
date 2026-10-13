@@ -1,4 +1,4 @@
-# Especificación del Esquema Relacional de Base de Datos (`schema-spec.md`)
+# Especificación del Esquema Relacional de Base de Datos (`03-schema-spec.md`)
 
 ## 1. Visión General
 * **Motor:** Microsoft SQL Server 2022+ / Azure SQL Database.

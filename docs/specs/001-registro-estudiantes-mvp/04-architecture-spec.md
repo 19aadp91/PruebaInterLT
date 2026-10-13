@@ -1,4 +1,4 @@
-# Especificación de Arquitectura de Software (`architecture-spec.md`)
+# Especificación de Arquitectura de Software (`04-architecture-spec.md`)
 
 ## 1. Identidad y Principios
 * **Estilo Arquitectónico:** Arquitectura Hexagonal (Puertos y Adaptadores) fusionada con Clean Architecture y CQRS para Backend; Arquitectura Basada en Componentes Standalone y Reactividad Zoneless con Signals para Frontend.

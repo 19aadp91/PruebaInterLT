@@ -1,10 +1,10 @@
-# Desglose de Tareas de Implementación (`tasks.md`)
+# Desglose de Tareas de Implementación (`07-tasks.md`)
 
 ## 1. Resumen Ejecutivo
-* **Especificación:** [spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/spec.md)
-* **Plan Técnico:** [plan.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/plan.md)
-* **Arquitectura de Software:** [architecture-spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/architecture-spec.md)
-* **Contrato Canónico:** [openapi.yaml](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/openapi.yaml)
+* **Especificación:** [01-spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/01-spec.md)
+* **Contrato Canónico:** [02-openapi.yaml](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/02-openapi.yaml)
+* **Arquitectura de Software:** [04-architecture-spec.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/04-architecture-spec.md)
+* **Plan Técnico:** [06-plan.md](file:///c:/Users/alvar/Documents/Prueba%20inter/docs/specs/001-registro-estudiantes-mvp/06-plan.md)
 * **Estado Global:** **100% Completado y Verificado** (26 tareas ejecutadas, 18 pruebas unitarias aprobadas, 0 advertencias, 0 errores).
 
 ---
